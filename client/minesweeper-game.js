@@ -117,7 +117,30 @@ Tile.prototype.click = function()
 		console.log("Flags: " + flagCount);
 
 		if(flagCount === this.danger) {
-			this.revealNeighbours();
+			for(var py = this.y - 1; py <= this.y + 1; py++)
+			{
+				for(var px = this.x - 1; px <= this.x + 1; px++)
+				{
+					if(px==this.x && py==this.y) { continue; }
+					
+					if(px < 0 || py < 0 ||
+						px >= cDiff.width ||
+						py >= cDiff.height)
+					{
+						continue;
+					}
+					
+					var idx = ((py * cDiff.width) + px);
+					if(grid[idx].currentState === 'hidden')
+					{
+						grid[idx].currentState = 'visible';
+						if(grid[idx].hasMine)
+							gameOver();
+						else if(grid[idx].danger === 0)
+							grid[idx].revealNeighbours();
+					}
+				}
+			}
 		}
 	}
 	else {
