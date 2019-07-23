@@ -470,7 +470,7 @@ function drawPlaying()
 			ctx.fillRect(px, py,
 				gameState.tileW, gameState.tileH);
 			ctx.fillStyle = "#000000";
-			ctx.fillText("✴️", px + halfW, py + halfH);
+			ctx.fillText("⚫", px + halfW, py + halfH);
 		}
 		else if(grid[i].currentState=='visible')
 		{
