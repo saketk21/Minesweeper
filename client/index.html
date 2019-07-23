@@ -1,12 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<script src="minesweeper-game.js"></script>
-	<title>Elevnth-Hour Minesweeper</title>
+    <title>Minesweeper</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script src="minesweeper-game.js"></script>
+
+    </script>
+
 </head>
 <body>
-	<canvas id="game" width="300" height="400"></canvas>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">Minesweeper</a>
+          </div>
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#" data-toggle="modal" data-target="#rulesModal">About Game</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#leaderboardModal">Leaderboard</a></li>
+            <li><a href="#"><span class="glyphicon glyphicon-user"></span>UserName</a></li>
+          </ul>
+        </div>
+    </nav>
+    <!-- Rules Modal -->
+    <div id="rulesModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Rules of the Game</h4>
+            </div>
+            <div class="modal-body">
+<p>
+              You can find complete rules with game description here. I will write a short summary anyway if you are too lazy (like me) to read the whole article:
+</p>
+            <p>  1. Goal of the game is to find all mines on the board.
+          <br> 2. You reveal mines by clicking at board field.
+            <br>  3. If you reveal a field with mine you lose the game.
+              <br>4. If you reveal field without a mine it will show exact number of mines surrounding that field.
+            <br>5. If you reveal field without number it means that there are no mines in its surroundings. In that case board will reveal all connected empty fields with its surroundings.
+              <br>6. You can flag field by right-clicking it.
+            <br>7. If you click on a revealed field and you already flagged all mines around that field, board will reveal rest of the hidden fields. Of course, if you misplaced flags you will reveal a field with a mine and lose the game.
+</p>
+                        <p>For more info refer <a>https://en.wikipedia.org/wiki/Minesweeper_(video_game)</a></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- Leaderboard Modal -->
+    <div id="leaderboardModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Leaderboard</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group">
+                        <a href="#" class="list-group-item">1. Ajay</a>
+                        <a href="#" class="list-group-item">2. Suresh</a>
+                        <a href="#" class="list-group-item">3. Vinit</a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+
+            </div>
+    </div>
+    <!-- <div class="row">
+        <div class="col-sm-2 text-center"></div>
+        <div class="col-sm-8 text-center">
+            <ul class="nav nav-pills nav-justified">
+								<button class="button button1" onclick="levelSelection(0)" >Easy</button>
+								<button class="button button2" onclick="levelSelection(1)"  >Blue</button>
+								<button class="button button3" onclick="levelSelection(2)" >Red</button>
+            </ul>
+        </div>
+        <div class="col-sm-2 text-center"></div>
+    </div> -->
+    </br>
+    <div class="row vertical-divider">
+            <div class="col-sm-3 text-center">
+                <p>Online Players</p>
+            </div>
+            <div class="col-sm-6">
+                <p>Board</p>
+                <div class="tab-content">
+									<canvas id="game" width="300" height="400"></canvas>
+                </div>
+
+            </div>
+            <div class="col-sm-3">
+                <div class="row text-center">
+                    <p>Game Results</p>
+                </div>
+                <div class="row text-center">
+                    <p>External Links</p>
+                    <a>https://en.wikipedia.org/wiki/Minesweeper_(video_game)</a>
+                </div>
+            </div>
+          </div>
 </body>
 </html>
