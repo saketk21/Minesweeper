@@ -231,6 +231,8 @@ function startLevel(diff)
 	gameState.difficulty	= diff;
 	gameState.screen	= 'playing';
 
+	flagClickCounter = 0;
+	totalClickCounter = 0;
 	gameTime		= 0;
 	lastFrameTime		= 0;
 
