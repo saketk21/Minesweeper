@@ -416,7 +416,7 @@ function drawPlaying()
 		(cDiff.width * gameState.tileW),
 		(cDiff.height * gameState.tileH));
 	
-	ctx.font = "bold 10px monospace";
+	ctx.font = "bold 14px monospace";
 	ctx.textAlign = "center";
 	ctx.textBaseline = "middle";
 	
@@ -428,10 +428,11 @@ function drawPlaying()
 		if(gameState.screen=='lost' && grid[i].hasMine)
 		{
 			ctx.fillStyle = "#ff0000";
+			ctx.font = "bold 14px monospace";
 			ctx.fillRect(px, py,
 				gameState.tileW, gameState.tileH);
 			ctx.fillStyle = "#000000";
-			ctx.fillText("x", px + halfW, py + halfH);
+			ctx.fillText("✴️", px + halfW, py + halfH);
 		}
 		else if(grid[i].currentState=='visible')
 		{
@@ -454,7 +455,7 @@ function drawPlaying()
 			if(grid[i].currentState=='flagged')
 			{
 				ctx.fillStyle = "#0000cc";
-				ctx.fillText("P", px + halfW, py + halfH);
+				ctx.fillText("🚩", px + halfW, py + halfH);
 			}
 		}
 	}
