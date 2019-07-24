@@ -5,6 +5,8 @@ var flagClickCounter=0,totalClickCounter=0;
 var gameTime = 0, lastFrameTime = 0;
 var currentSecond = 0, frameCount = 0, framesLastSecond = 0;
 
+var finalTime = 0;
+
 var depressedAreas = 0;
 var numberCount = 0;
 var value3BV = 0;
@@ -139,7 +141,7 @@ Tile.prototype.click = function()
 				}
 			}
 		}
-		console.log("Flags: " + flagCount);
+		// console.log("Flags: " + flagCount);
 
 		if(flagCount === this.danger) {
 			for(var py = this.y - 1; py <= this.y + 1; py++)
@@ -228,6 +230,8 @@ function checkState()
 	}
 
 	gameState.screen = 'won';
+	finalTime = Math.round(gameState.timeTaken/1000);
+
 }
 
 function gameOver()
@@ -306,6 +310,7 @@ function startLevel(diff)
 	lastFrameTime		= 0;
 
 	grid.length		= 0;
+	finalTime = 0;
 	clonedGrid.length = 0;
 	affected.length = 0;
 	visited.length = 0;
@@ -354,7 +359,6 @@ function startLevel(diff)
 					numberCount++;
 
 	value3BV = depressedAreas + numberCount;
-	console.log(value3BV);
 }
 
 function aiClickCorner(){
@@ -575,6 +579,20 @@ function drawPlaying()
 	{
 		ctx.textAlign = "center";
 		ctx.font = "bold 20px sans-serif";
+
+
+
+		if(gameState.screen == 'won'){
+			document.getElementById("results").innerHTML = "Results";
+			document.getElementById("noOfClicks").innerHTML = "Total Clicks: "+ totalClickCounter;
+			document.getElementById("3BV").innerHTML = "3BV : "+ value3BV;
+			var efficiency = Math.round((value3BV/totalClickCounter)*100);
+			document.getElementById("efficiency").innerHTML = "Efficiency: "+efficiency + "&percnt;";
+			document.getElementById("time").innerHTML = "Total time taken: "+finalTime +" seconds";
+		}
+
+
+
 		ctx.fillText(
 			(gameState.screen=='lost' ?
 				"Game Over" : "Cleared!"), 150, offsetY - 15);
