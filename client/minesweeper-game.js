@@ -312,6 +312,10 @@ function startLevel(diff)
 	affected.length = 0;
 	visited.length = 0;
 
+	depressedAreas = 0;
+	numberCount = 0;
+	value3BV = 0;
+
 	var cDiff = difficulties[diff];
 
 	offsetX = Math.floor((document.getElementById('game').width -
