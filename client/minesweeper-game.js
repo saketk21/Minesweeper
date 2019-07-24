@@ -359,32 +359,32 @@ function startLevel(diff)
 
 function aiClickCorner(){
 	var cDiff = difficulties[gameState.difficulty];
-		var cornerId = Math.floor(Math.random() * 4);
-		if(aiCorners[cornerId]==0){
-			switch(cornerId){
-				case 0:
-					aiTargetX = 0;
-					aiTargetY = 0;
-					break;
-				case 1:
-					aiTargetX = 0;
-					aiTargetY = cDiff.height-1;
-					break;
-				case 2:
-					aiTargetX = cDiff.width-1;
-					aiTargetY = 0;
-					break;
-				case 3:
-					aiTargetX = cDiff.width-1;
-					aiTargetY = cDiff.height-1;
-					break;
-			}
-			aiCorners[cornerId] = 1;
-			aiCornerCount++;
-			var tile = [aiTargetX,aiTargetY];
-			console.log(aiTargetX +", "+ aiTargetY);
-			grid[((tile[1] * cDiff.width) + tile[0])].click();
+	var cornerId = Math.floor(Math.random() * 4);
+	if(aiCorners[cornerId]==0){
+		switch(cornerId){
+			case 0:
+				aiTargetX = 0;
+				aiTargetY = 0;
+				break;
+			case 1:
+				aiTargetX = 0;
+				aiTargetY = cDiff.height-1;
+				break;
+			case 2:
+				aiTargetX = cDiff.width-1;
+				aiTargetY = 0;
+				break;
+			case 3:
+				aiTargetX = cDiff.width-1;
+				aiTargetY = cDiff.height-1;
+				break;
 		}
+		aiCorners[cornerId] = 1;
+		aiCornerCount++;
+		var tile = [aiTargetX,aiTargetY];
+		console.log(aiTargetX +", "+ aiTargetY);
+		grid[((tile[1] * cDiff.width) + tile[0])].click();
+	}
 }
 
 function aiSolver(){
@@ -392,7 +392,7 @@ function aiSolver(){
 		aiClickCorner();
 	}
 	else{
-
+		
 	}
 }
 
