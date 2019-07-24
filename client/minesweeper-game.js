@@ -5,6 +5,14 @@ var flagClickCounter=0,totalClickCounter=0;
 var gameTime = 0, lastFrameTime = 0;
 var currentSecond = 0, frameCount = 0, framesLastSecond = 0;
 
+var depressedAreas = 0;
+var numberCount = 0;
+var value3BV = 0;
+
+var clonedGrid = [];
+var visited = [];
+var affected = [];
+
 var offsetX = 0, offsetY = 0;
 var grid = [];
 
@@ -224,6 +232,64 @@ function gameOver()
 	gameState.screen = 'lost';
 }
 
+function generateArrays(){
+	for (var idx in grid) {
+        if (grid[idx].hasMine === true)
+            clonedGrid.push(-1);
+        else if (grid[idx].danger === 0)
+            clonedGrid.push(0);
+        else
+			clonedGrid.push(1);
+		visited.push(false);
+		affected.push(false);
+	}
+
+	for(var index = 0; index < clonedGrid.length; index++){
+		if(clonedGrid[index] === 0){
+				calculate3BV(index);
+				depressedAreas++;
+		}
+	}
+}
+
+function calculate3BV( idx) {
+	if(clonedGrid[idx] === -1)
+		return;
+
+	if((clonedGrid[idx] === 0 && visited[idx] == false) || (affected[idx] === true)) {
+
+		if(clonedGrid[idx] === 0)
+			affected[idx] = false;
+
+		if(affected[idx] === true){
+			clonedGrid[idx] = -1;
+			visited[idx] = true;
+			return;
+		}
+		var cDiff = difficulties[gameState.difficulty];
+		for (var py = grid[idx].y - 1; py <= grid[idx].y + 1; py++) {
+			for (var px = grid[idx].x - 1; px <= grid[idx].x + 1; px++) {
+				if (px == grid[idx].x && py == grid[idx].y) { continue; }
+
+				if (px < 0 || py < 0 ||
+					px >= cDiff.width ||
+					py >= cDiff.height) {
+					continue;
+				}
+				clonedGrid[idx] = -1;
+				visited[idx] = true;
+				var index = py * difficulties[gameState.difficulty].width + px;
+
+				affected[index] = true;
+				calculate3BV(index);
+
+			}
+
+		}
+
+	}
+}
+
 function startLevel(diff)
 {
 	gameState.newBest	= false;
@@ -269,6 +335,16 @@ function startLevel(diff)
 	}
 
 	for(var i in grid) { grid[i].calcDanger(); }
+
+
+	generateArrays();
+
+	for(var ind = 0; ind < clonedGrid.length; ind++)
+	 	if(clonedGrid[ind] === 1)
+					numberCount++;
+
+	value3BV = depressedAreas + numberCount;
+	console.log(value3BV);
 }
 
 function updateGame()
