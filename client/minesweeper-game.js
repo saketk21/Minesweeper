@@ -5,6 +5,8 @@ var flagClickCounter=0,totalClickCounter=0;
 var gameTime = 0, lastFrameTime = 0;
 var currentSecond = 0, frameCount = 0, framesLastSecond = 0;
 
+var finalTime = 0;
+
 var depressedAreas = 0;
 var numberCount = 0;
 var value3BV = 0;
@@ -15,6 +17,9 @@ var affected = [];
 
 var offsetX = 0, offsetY = 0;
 var grid = [];
+var aiCornerCount = 0;
+var aiCorners = [0,0,0,0];
+var aiTargetX, aiTargetY;
 
 var mouseState = {
 	x	: 0,
@@ -136,7 +141,7 @@ Tile.prototype.click = function()
 				}
 			}
 		}
-		console.log("Flags: " + flagCount);
+		// console.log("Flags: " + flagCount);
 
 		if(flagCount === this.danger) {
 			for(var py = this.y - 1; py <= this.y + 1; py++)
@@ -225,7 +230,8 @@ function checkState()
 	}
 
 	gameState.screen = 'won';
-	console.log(gameState.timeTaken/1000);
+	finalTime = Math.round(gameState.timeTaken/1000);
+
 }
 
 function gameOver()
@@ -305,6 +311,7 @@ function startLevel(diff)
 	lastFrameTime		= 0;
 
 	grid.length		= 0;
+	finalTime = 0;
 	clonedGrid.length = 0;
 	affected.length = 0;
 	visited.length = 0;
@@ -353,7 +360,45 @@ function startLevel(diff)
 					numberCount++;
 
 	value3BV = depressedAreas + numberCount;
-	console.log(value3BV);
+}
+
+function aiClickCorner(){
+	var cDiff = difficulties[gameState.difficulty];
+	var cornerId = Math.floor(Math.random() * 4);
+	if(aiCorners[cornerId]==0){
+		switch(cornerId){
+			case 0:
+				aiTargetX = 0;
+				aiTargetY = 0;
+				break;
+			case 1:
+				aiTargetX = 0;
+				aiTargetY = cDiff.height-1;
+				break;
+			case 2:
+				aiTargetX = cDiff.width-1;
+				aiTargetY = 0;
+				break;
+			case 3:
+				aiTargetX = cDiff.width-1;
+				aiTargetY = cDiff.height-1;
+				break;
+		}
+		aiCorners[cornerId] = 1;
+		aiCornerCount++;
+		var tile = [aiTargetX,aiTargetY];
+		console.log(aiTargetX +", "+ aiTargetY);
+		grid[((tile[1] * cDiff.width) + tile[0])].click();
+	}
+}
+
+function aiSolver(){
+	if(aiCornerCount != 4){
+		aiClickCorner();
+	}
+	else{
+		
+	}
 }
 
 function updateGame()
@@ -368,6 +413,10 @@ function updateGame()
 					mouseState.y <= difficulties[i].menuBox[1])
 				{
 					startLevel(i);
+					if (confirm("Do you want the AI to solve it?")) {
+						gameState.screen = "AIplaying";
+						return;
+					}
 					break;
 				}
 			}
@@ -531,6 +580,20 @@ function drawPlaying()
 	{
 		ctx.textAlign = "center";
 		ctx.font = "bold 20px sans-serif";
+
+
+
+		if(gameState.screen == 'won'){
+			document.getElementById("results").innerHTML = "Results";
+			document.getElementById("noOfClicks").innerHTML = "Total Clicks: "+ totalClickCounter;
+			document.getElementById("3BV").innerHTML = "3BV : "+ value3BV;
+			var efficiency = Math.round((value3BV/totalClickCounter)*100);
+			document.getElementById("efficiency").innerHTML = "Efficiency: "+efficiency + "&percnt;";
+			document.getElementById("time").innerHTML = "Total time taken: "+finalTime +" seconds";
+		}
+
+
+
 		ctx.fillText(
 			(gameState.screen=='lost' ?
 				"Game Over" : "Cleared!"), 150, offsetY - 15);
@@ -597,8 +660,11 @@ function drawGame()
 	gameTime+= timeElapsed;
 
 	// Update game
-	updateGame();
-
+	if(gameState.screen != "AIplaying")
+		updateGame();
+	else{
+		setTimeout(aiSolver, 1000);//aiSolver();//
+	}
 	// Frame counting
 	var sec = Math.floor(Date.now()/1000);
 	if(sec!=currentSecond)

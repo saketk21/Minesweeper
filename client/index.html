@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+z<!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Minesweeper</title>
@@ -20,13 +20,12 @@
           <div class="navbar-header">
             <a class="navbar-brand" href="#">Minesweeper</a>
           </div>
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-          </ul>
+
           <ul class="nav navbar-nav navbar-right">
             <li><a href="#" data-toggle="modal" data-target="#rulesModal">About Game</a></li>
-            <li><a href="#" data-toggle="modal" data-target="#leaderboardModal">Leaderboard</a></li>
+            <!-- <li><a href="#" data-toggle="modal" data-target="#leaderboardModal">Leaderboard</a></li> -->
             <li><a href="#"><span class="glyphicon glyphicon-user"></span>UserName</a></li>
+
           </ul>
         </div>
     </nav>
@@ -62,10 +61,9 @@
         </div>
     </div>
     <!-- Leaderboard Modal -->
-    <div id="leaderboardModal" class="modal fade" role="dialog">
+        <!-- <div id="leaderboardModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
 
-                <!-- Modal content-->
                 <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -84,7 +82,7 @@
                 </div>
 
             </div>
-    </div>
+    </div> -->
     <!-- <div class="row">
         <div class="col-sm-2 text-center"></div>
         <div class="col-sm-8 text-center">
@@ -97,26 +95,51 @@
         <div class="col-sm-2 text-center"></div>
     </div> -->
     </br>
-    <div class="row vertical-divider">
-            <div class="col-sm-3 text-center">
-                <p>Online Players</p>
-            </div>
-            <div class="col-sm-6">
-                <p>Board</p>
-                <div class="tab-content">
-									<canvas id="game" width="300" height="400"></canvas>
-                </div>
 
             </div>
-            <div class="col-sm-3">
-                <div class="row text-center">
-                    <p>Game Results</p>
+
+            <div class="column" style="background-color:	#FFFFFF; width:70%; height:700px;">
+               <div class="tab-content">
+                <canvas id="game" width="300" height="400"></canvas>
+               </div>
+             </div>
+
+
+
+
+
+             <div class="column" style="background-color:	#FFFFFF;width:30%; height:700px;">
+               <div class="row" style="background-color:#FFFFFF; height:350px;margin-left: 0px;
+               margin-right: 0px;">
+                <div>
+
+                  <h4 id = "results"></h4>
+                  <p id = "time"></p>
+                  <p id = "noOfClicks"></p>
+                  <p id = "3BV"></p>
+                  <p id  = "efficiency"></p>
+
                 </div>
-                <div class="row text-center">
-                    <p>External Links</p>
-                    <a>https://en.wikipedia.org/wiki/Minesweeper_(video_game)</a>
-                </div>
-            </div>
-          </div>
+               </div>
+
+
+
+
+               <div class="row" style="background-color:#FFFFFF; height:350px;margin-left: 0px;
+               margin-right: 0px;">
+               <a href = "#"></a>
+               <a href = "#"></a>
+               <a href = "#"></a>
+
+               </div>
+
+
+
+             </div>
+
+
+
+
+      </div>
 </body>
 </html>
