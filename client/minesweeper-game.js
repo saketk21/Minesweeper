@@ -237,7 +237,6 @@ function checkState()
 function gameOver()
 {
 	gameState.screen = 'lost';
-	console.log(gamestate.timeTaken/1000);
 }
 
 function generateArrays(){
@@ -652,7 +651,14 @@ function drawPlaying()
 function drawGame()
 {
 	if(ctx==null) { return; }
-
+	if(gameState.screen=='menu'){
+		document.getElementById("results").innerHTML = "";
+		document.getElementById("noOfClicks").innerHTML = "";
+		document.getElementById("3BV").innerHTML = "";
+		// var efficiency = Math.round((value3BV/totalClickCounter)*100);
+		document.getElementById("efficiency").innerHTML = "";
+		document.getElementById("time").innerHTML = "";
+	}
 	// Frame & update related timing
 	var currentFrameTime = Date.now();
 	if(lastFrameTime==0) { lastFrameTime = currentFrameTime; }
