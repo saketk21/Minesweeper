@@ -225,11 +225,13 @@ function checkState()
 	}
 
 	gameState.screen = 'won';
+	console.log(gameState.timeTaken/1000);
 }
 
 function gameOver()
 {
 	gameState.screen = 'lost';
+	console.log(gamestate.timeTaken/1000);
 }
 
 function generateArrays(){
