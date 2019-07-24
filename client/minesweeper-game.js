@@ -15,6 +15,9 @@ var affected = [];
 
 var offsetX = 0, offsetY = 0;
 var grid = [];
+var aiCornerCount = 0;
+var aiCorners = [0,0,0,0];
+var aiTargetX, aiTargetY;
 
 var mouseState = {
 	x	: 0,
@@ -354,6 +357,45 @@ function startLevel(diff)
 	console.log(value3BV);
 }
 
+function aiClickCorner(){
+	var cDiff = difficulties[gameState.difficulty];
+		var cornerId = Math.floor(Math.random() * 4);
+		if(aiCorners[cornerId]==0){
+			switch(cornerId){
+				case 0:
+					aiTargetX = 0;
+					aiTargetY = 0;
+					break;
+				case 1:
+					aiTargetX = 0;
+					aiTargetY = cDiff.height-1;
+					break;
+				case 2:
+					aiTargetX = cDiff.width-1;
+					aiTargetY = 0;
+					break;
+				case 3:
+					aiTargetX = cDiff.width-1;
+					aiTargetY = cDiff.height-1;
+					break;
+			}
+			aiCorners[cornerId] = 1;
+			aiCornerCount++;
+			var tile = [aiTargetX,aiTargetY];
+			console.log(aiTargetX +", "+ aiTargetY);
+			grid[((tile[1] * cDiff.width) + tile[0])].click();
+		}
+}
+
+function aiSolver(){
+	if(aiCornerCount != 4){
+		aiClickCorner();
+	}
+	else{
+
+	}
+}
+
 function updateGame()
 {
 	if(gameState.screen=='menu')
@@ -366,6 +408,10 @@ function updateGame()
 					mouseState.y <= difficulties[i].menuBox[1])
 				{
 					startLevel(i);
+					if (confirm("Do you want the AI to solve it?")) {
+						gameState.screen = "AIplaying";
+						return;
+					}
 					break;
 				}
 			}
@@ -595,8 +641,11 @@ function drawGame()
 	gameTime+= timeElapsed;
 
 	// Update game
-	updateGame();
-
+	if(gameState.screen != "AIplaying")
+		updateGame();
+	else{
+		setTimeout(aiSolver, 1000);//aiSolver();//
+	}
 	// Frame counting
 	var sec = Math.floor(Date.now()/1000);
 	if(sec!=currentSecond)
