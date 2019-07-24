@@ -69,6 +69,7 @@ function Tile(x, y)
 	this.hasMine		= false;
 	this.danger		= 0;
 	this.currentState	= 'hidden';
+	this.flaggedNear = 0;
 }
 Tile.prototype.calcDanger = function()
 {
@@ -97,14 +98,32 @@ Tile.prototype.calcDanger = function()
 Tile.prototype.flag = function()
 {
 	totalClickCounter++;
-	if(this.currentState=='hidden')
-	{
-		 flagClickCounter++;
+	if(this.currentState=='hidden'){
+		flagClickCounter++;
 		this.currentState = 'flagged';
 	}
 	else if(this.currentState=='flagged') {
-flagClickCounter--;
-		this.currentState = 'hidden'; }
+		flagClickCounter--;
+		this.currentState = 'hidden';
+	}
+	var cDiff = difficulties[gameState.difficulty];
+	for(var py = this.y - 1; py <= this.y + 1; py++)
+	{
+		for(var px = this.x - 1; px <= this.x + 1; px++)
+		{
+			if(px==this.x && py==this.y) { continue; }
+
+			if(px < 0 || py < 0 ||
+				px >= cDiff.width ||
+				py >= cDiff.height)
+			{
+				continue;
+			}
+
+			var idx = ((py * cDiff.width) + px);
+			grid[idx].flaggedNear++;
+		}
+	}
 };
 
 
@@ -392,12 +411,92 @@ function aiClickCorner(){
 	}
 }
 
+function aiSameDangerAndFlaggedNear(){
+	for(var i in grid){
+		if(grid[i].danger == grid[i].flaggedNear){
+			var centerX = grid[i].x;
+			var centerY = grid[i].y;
+			var cDiff = difficulties[gameState.difficulty];
+			for(var py = centerY - 1; py <= centerY + 1; py++)
+			{
+				for(var px = centerX - 1; px <= centerX + 1; px++)
+				{
+					if(px==centerX && py==centerY) { continue; }
+
+					if(px < 0 || py < 0 ||
+						px >= cDiff.width ||
+						py >= cDiff.height)
+					{
+						continue;
+					}
+
+					var idx = ((py * cDiff.width) + px);
+					if(grid[idx].currentState=='hidden'){
+						grid[idx].click();
+						console.log("I am clicking");
+					}
+				}
+			}
+		}
+	}
+}
+
+function aiSameDangerAndHiddenNear(){
+	for(var i in grid){
+		var hiddenNear = 0;
+		var centerX = grid[i].x;
+		var centerY = grid[i].y;
+		var cDiff = difficulties[gameState.difficulty];
+		for(var py = centerY - 1; py <= centerY + 1; py++)
+		{
+			for(var px = centerX - 1; px <= centerX + 1; px++)
+			{
+				if(px==centerX && py==centerY) { continue; }
+
+				if(px < 0 || py < 0 ||
+					px >= cDiff.width ||
+					py >= cDiff.height)
+				{
+					continue;
+				}
+
+				var idx = ((py * cDiff.width) + px);
+				if(grid[idx].currentState=='hidden'){
+					hiddenNear++;
+				}
+			}
+		}
+		if(grid[i].danger == hiddenNear){
+			for(var py = centerY - 1; py <= centerY + 1; py++)
+			{
+				for(var px = centerX - 1; px <= centerX + 1; px++)
+				{
+					if(px==centerX && py==centerY) { continue; }
+
+					if(px < 0 || py < 0 ||
+						px >= cDiff.width ||
+						py >= cDiff.height)
+					{
+						continue;
+					}
+
+					var idx = ((py * cDiff.width) + px);
+					if(grid[idx].currentState=='hidden'){
+						grid[idx].currentState = 'flagged';
+					}
+				}
+			}
+		}
+	}
+}
+
 function aiSolver(){
 	if(aiCornerCount != 4){
 		aiClickCorner();
 	}
 	else{
-		
+		setTimeout(aiSameDangerAndFlaggedNear, 3000);//aiSameDangerAndFlaggedNear();		//click on remaining hidden tiles
+		//aiSameDangerAndHiddenNear();		//flag on remaining hidden tiles
 	}
 }
 
