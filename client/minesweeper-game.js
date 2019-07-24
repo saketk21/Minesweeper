@@ -303,6 +303,9 @@ function startLevel(diff)
 	lastFrameTime		= 0;
 
 	grid.length		= 0;
+	clonedGrid.length = 0;
+	affected.length = 0;
+	visited.length = 0;
 
 	var cDiff = difficulties[diff];
 
