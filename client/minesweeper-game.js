@@ -22,14 +22,17 @@ var aiCornerCount = 0;
 var aiCorners = [0,0,0,0];
 var aiTargetX = 0, aiTargetY = 0;
 var flagTarget = false;
-var targetsList = [];
+var targetsList = [];		//has a list of tiles on which the AI will perform either click or flag action
 var aiFlag = false;
 
+//stores x-y coordinates and click status of mouse
 var mouseState = {
 	x	: 0,
 	y	: 0,
 	click	: null
 };
+
+//sets the game's attributes as per the difficulty level and also the live state of the game
 var gameState = {
 	difficulty	: 'easy',
 	screen		: 'menu',
@@ -39,6 +42,8 @@ var gameState = {
 	tileW		: 25,
 	tileH		: 25
 };
+
+//defines all the board's attributes as per the difficulty levels
 var difficulties = {
 	easy	: {
 		name		: "Easy",
@@ -66,28 +71,32 @@ var difficulties = {
 	}
 };
 
+//stores the x-y coordinates and the action to be performed on it
 function Target(x, y, needToFlag) {
 	this.x = x;
 	this.y = y;
 	this.needToFlag = needToFlag;
 }
 
+//class to define each tile and all its associated properties
 function Tile(x, y)
 {
 	this.x = x;
 	this.y = y;
 	this.hasMine = false;
 	this.danger	= 0;
-	this.currentState = 'hidden';
+	this.currentState = 'hidden';			//defines whether tile is hidden or flagged or visible
 
 	// Required information for AI Solver for tile
 	this.alreadyTargeted = false;
-	this.flaggedNear = 0;
-	this.hiddenNear = 0;
+	this.flaggedNear = 0;							//No of neighbouring flagged tiles
+	this.hiddenNear = 0;							//No of neighbouring hidden tiles
 	this.allHiddenNeighbours = [];
 	this.isLinked = false;
-	this.linkedWith = [];
+	this.linkedWith = [];							//list of neighbouring hidden tiles with exactly one mine among them
 }
+
+//function to calculate the number to be displayed on each visible tile in the grid
 Tile.prototype.calcDanger = function()
 {
 	var cDiff = difficulties[gameState.difficulty];
@@ -112,6 +121,8 @@ Tile.prototype.calcDanger = function()
 		}
 	}
 };
+
+//mark a tile as flagged
 Tile.prototype.flag = function()
 {
 	totalClickCounter++;
@@ -125,7 +136,7 @@ Tile.prototype.flag = function()
 	}
 };
 
-
+//Will perform click action and take respective actions on the neighbouring tiles
 Tile.prototype.click = function()
 {
 	totalClickCounter++;
@@ -195,6 +206,8 @@ Tile.prototype.click = function()
 
 	checkState();
 };
+
+//reveal all the neighbours of the clicked tile
 Tile.prototype.revealNeighbours = function()
 {
 	var cDiff = difficulties[gameState.difficulty];
@@ -227,16 +240,20 @@ Tile.prototype.revealNeighbours = function()
 	}
 };
 
+//Recomputes various attributes for each tile in the grid after each click or flag
 function computeTileInfo() {
 	for(var i in grid) {
 		grid[i].hiddenNear = 0;
 		grid[i].flaggedNear = 0;
 		grid[i].allHiddenNeighbours = [];
-		
+
 		var centerX = grid[i].x;
 		var centerY = grid[i].y;
 		var cDiff = difficulties[gameState.difficulty];
+
 		for(var py = centerY - 1; py <= centerY + 1; py++)
+		//if a neighboring tile was flagged or hidden, it will increase the respective counter for that tile and also add that hidden
+		//tile to the 'allHiddenNeighbours' array for that tile
 		{
 			for(var px = centerX - 1; px <= centerX + 1; px++)
 			{
@@ -258,11 +275,13 @@ function computeTileInfo() {
 		}
 	}
 
+	//code for adding a list of tiles that satisfy the condition of linkedTiles to that array and also taking care
+	//of isLinked attribute for that tile
 	for(var i in grid) {
 		var centerX = grid[i].x;
 		var centerY = grid[i].y;
 		var cDiff = difficulties[gameState.difficulty];
-		
+
 		if(grid[i].danger - grid[i].flaggedNear === 1 && grid[i].hiddenNear !== 1) {
 			var temp = [];
 			for(py = centerY - 1; py <= centerY + 1; py++) {
@@ -297,6 +316,7 @@ function computeTileInfo() {
 	}
 }
 
+//checks state of the game and takes actions accordingly
 function checkState()
 {
 	for(var i in grid)
@@ -322,11 +342,13 @@ function checkState()
 
 }
 
+//function to change the game's state to lost
 function gameOver()
 {
 	gameState.screen = 'lost';
 }
 
+//used for calculation of 3BV - Bechtel's Board Benchmark Value for the Result Section
 function generateArrays(){
 	for (var idx in grid) {
         if (grid[idx].hasMine === true)
@@ -347,6 +369,7 @@ function generateArrays(){
 	}
 }
 
+//calculates 3BV for the Result Section
 function calculate3BV( idx) {
 	if(clonedGrid[idx] === -1)
 		return;
@@ -385,6 +408,8 @@ function calculate3BV( idx) {
 	}
 }
 
+//called when any level is started, creates the Board, places mines randomly, also calls method to calculate 3BV
+//for that Board
 function startLevel(diff)
 {
 	gameState.newBest	= false;
@@ -456,6 +481,7 @@ function startLevel(diff)
 	value3BV = depressedAreas + numberCount;
 }
 
+//method used by our AI solver to click on the corners of the Board if it finds no other better action to perform
 function aiClickRandomTile() {
 	var cDiff = difficulties[gameState.difficulty];
 	// start by clicking corners
@@ -494,6 +520,8 @@ function aiClickRandomTile() {
 
 }
 
+//method used by our AI solver to click on the neighboring hidden tiles if the value displayed on the tile (danger)
+//and the no. of flags around the tile are same
 function aiSameDangerAndFlaggedNear(){
 	for(var i in grid){
 		if(grid[i].danger == grid[i].flaggedNear){
@@ -525,6 +553,8 @@ function aiSameDangerAndFlaggedNear(){
 	}
 }
 
+//method used by our AI solver to flag the neighboring hidden tiles if the value displayed on the tile (danger)
+//and the no. of hidden tiles around the tile are same
 function aiSameDangerAndHiddenNear(){
 	for(var i in grid){
 		if(grid[i].danger == grid[i].hiddenNear && grid[i].danger !== 0){
@@ -554,6 +584,9 @@ function aiSameDangerAndHiddenNear(){
 	}
 }
 
+//method used by our AI solver, to add a list of tiles (that are safe to click at) to the 'targetList'
+//logic for safe tiles is such that mutually excluded set of tiles from the intersection of all the set of tiles
+//in the array of 'linkedWith'
 function aiFindTargetsUsingLinkedInfo() {
 	for(var i in grid) {
 		if(grid[i].currentState === 'visible') {
@@ -588,6 +621,7 @@ function aiFindTargetsUsingLinkedInfo() {
 	}
 }
 
+//method called when User chooses the game to be played by the UI.
 function aiSolver() {
 	var cDiff = difficulties[gameState.difficulty];
 
@@ -631,7 +665,7 @@ function aiSolver() {
 			flagTarget = false;
 			console.log("targetList clicks");}
 		targetsList.shift();
-		
+
 	}
 	else {		// All previously computed targets have been exhausted
 		findNewTarget();
@@ -720,6 +754,7 @@ function updateGame()
 	}
 }
 
+//method called repeatedly, in order to display the Board's UI
 window.onload = function()
 {
 	ctx = document.getElementById('game').getContext('2d');
@@ -747,6 +782,7 @@ window.onload = function()
 	requestAnimationFrame(drawGame);
 };
 
+//method that updates UI when the game's state is 'menu'
 function drawMenu()
 {
 	ctx.textAlign = 'center';
@@ -794,6 +830,7 @@ function drawMenu()
 	}
 }
 
+//method that updates UI when the game's state is 'playing'
 function drawPlaying()
 {
 	var halfW = gameState.tileW / 2;
@@ -903,6 +940,7 @@ function drawPlaying()
 	}
 }
 
+//called repeatedly to display UI
 function drawGame()
 {
 	if(ctx==null) { return; }
@@ -958,6 +996,7 @@ function drawGame()
 	requestAnimationFrame(drawGame);
 }
 
+//translates the coordinates clicked by the mouse to the x-y coordinates for the Board.
 function realPos(x, y)
 {
 	var p = document.getElementById('game');
