@@ -23,6 +23,7 @@ var aiCorners = [0,0,0,0];
 var aiTargetX = 0, aiTargetY = 0;
 var flagTarget = false;
 var targetsList = [];
+var aiFlag = false;
 
 var mouseState = {
 	x	: 0,
@@ -411,6 +412,7 @@ function startLevel(diff)
 	aiTargetX = 0, aiTargetY = 0;
 	flagTarget = false;
 	targetsList = [];
+	aiFlag = false;
 
 	var cDiff = difficulties[diff];
 
@@ -458,29 +460,38 @@ function aiClickRandomTile() {
 	var cDiff = difficulties[gameState.difficulty];
 	// start by clicking corners
 	var cornerId = Math.floor(Math.random() * 4);
-	if(aiCorners[cornerId]==0){
-		switch(cornerId){
-			case 0:
-				aiTargetX = 0;
-				aiTargetY = 0;
-				break;
-			case 1:
-				aiTargetX = 0;
-				aiTargetY = cDiff.height-1;
-				break;
-			case 2:
-				aiTargetX = cDiff.width-1;
-				aiTargetY = 0;
-				break;
-			case 3:
-				aiTargetX = cDiff.width-1;
-				aiTargetY = cDiff.height-1;
-				break;
+	if(aiCornerCount<4){
+		if(aiCorners[cornerId]==0){
+			switch(cornerId){
+				case 0:
+					aiTargetX = 0;
+					aiTargetY = 0;
+					break;
+				case 1:
+					aiTargetX = 0;
+					aiTargetY = cDiff.height-1;
+					break;
+				case 2:
+					aiTargetX = cDiff.width-1;
+					aiTargetY = 0;
+					break;
+				case 3:
+					aiTargetX = cDiff.width-1;
+					aiTargetY = cDiff.height-1;
+					break;
+			}
+			aiCorners[cornerId] = 1;
+			aiCornerCount++;
 		}
-		aiCorners[cornerId] = 1;
-		aiCornerCount++;
-		grid[((aiTargetY * cDiff.width) + aiTargetX)].click();
 	}
+	else{
+		do{
+		aiTargetX = Math.floor(Math.random() * cDiff.width);
+		aiTargetY = Math.floor(Math.random() * cDiff.height);}while(grid[((aiTargetY * cDiff.width) + aiTargetX)].hasMine == true);
+	}
+	grid[((aiTargetY * cDiff.width) + aiTargetX)].click();
+	console.log("aiClickRandomTile clicks");
+
 }
 
 function aiSameDangerAndFlaggedNear(){
@@ -505,6 +516,7 @@ function aiSameDangerAndFlaggedNear(){
 					var idx = ((py * cDiff.width) + px);
 					if(grid[idx].currentState=='hidden' && !grid[idx].alreadyTargeted){
 						targetsList.push(new Target(px, py, false));
+						console.log("aiSameDangerAndFlaggedNear clicks");
 						grid[idx].alreadyTargeted = true;
 					}
 				}
@@ -516,7 +528,7 @@ function aiSameDangerAndFlaggedNear(){
 function aiSameDangerAndHiddenNear(){
 	for(var i in grid){
 		if(grid[i].danger == grid[i].hiddenNear && grid[i].danger !== 0){
-			console.log("Flagging all hidden: ", grid[i].x, grid[i].y, grid[i].danger, grid[i].hiddenNear);
+			//console.log("Flagging all hidden: ", grid[i].x, grid[i].y, grid[i].danger, grid[i].hiddenNear);
 			var centerX = grid[i].x;
 			var centerY = grid[i].y;
 			var cDiff = difficulties[gameState.difficulty];
@@ -533,6 +545,7 @@ function aiSameDangerAndHiddenNear(){
 					var idx = ((py * cDiff.width) + px);
 					if(grid[idx].currentState=='hidden' && !grid[idx].alreadyTargeted) {
 						targetsList.push(new Target(px, py, true));
+						console.log("aiSameDangerAndHiddenNear flags");
 						grid[idx].alreadyTargeted = true;
 					}
 				}
@@ -561,6 +574,7 @@ function aiFindTargetsUsingLinkedInfo() {
 									if(!linkedTilesAdjacentToThis.includes(grid[i].allHiddenNeighbours[m])) {
 										temp = grid[i].allHiddenNeighbours[m];
 										targetsList.push(new Target(temp.x, temp.y, true));
+										console.log("aiFindTargetsUsingLinkedInfo clicks");
 										temp.alreadyTargeted = true;
 									}
 								}
@@ -610,12 +624,14 @@ function aiSolver() {
 	if(targetsList.length !== 0) {
 		aiTargetX = targetsList[0].x;
 		aiTargetY = targetsList[0].y;
-
-		if(targetsList[0].needToFlag)
+		if(targetsList[0].needToFlag){
 			flagTarget = true;
-		else
+			console.log("targetList flags");}
+		else{
 			flagTarget = false;
+			console.log("targetList clicks");}
 		targetsList.shift();
+		
 	}
 	else {		// All previously computed targets have been exhausted
 		findNewTarget();
@@ -625,7 +641,7 @@ function aiSolver() {
 // Use obtained information to determine whether any new targets are generated
 function findNewTarget() {
 	// Any tile having equal danger and hidden tiles -> All hidden tiles are mines
-	aiSameDangerAndHiddenNear();
+	//aiSameDangerAndHiddenNear();
 	// Any tile having equal danger and flagged tiles -> All hidden tiles are safe
 	aiSameDangerAndFlaggedNear();
 	// If still no new targets revealed - check using linked configurations
@@ -650,6 +666,8 @@ function updateGame()
 				{
 					startLevel(i);
 					if (confirm("Do you want the AI to solve it?")) {
+						aiFlag = true;
+						mouseState.click = null;
 						gameState.screen = "AIplaying";
 						return;
 					}
@@ -820,16 +838,13 @@ function drawPlaying()
 
 
 		if(gameState.screen == 'won'){
-			console.log("I WIN!");
 			document.getElementById("results").innerHTML = "Results";
-			document.getElementById("noOfClicks").innerHTML = "Total Clicks: "+ totalClickCounter;
+			if(aiFlag==false)document.getElementById("noOfClicks").innerHTML = "Total Clicks: "+ totalClickCounter;
 			document.getElementById("3BV").innerHTML = "3BV : "+ value3BV;
 			var efficiency = Math.round((value3BV/totalClickCounter)*100);
-			document.getElementById("efficiency").innerHTML = "Efficiency: "+efficiency + "&percnt;";
+			if(aiFlag==false)document.getElementById("efficiency").innerHTML = "Efficiency: "+efficiency + "&percnt;";
 			document.getElementById("time").innerHTML = "Total time taken: "+finalTime +" seconds";
 		}
-
-
 
 		ctx.fillText(
 			(gameState.screen=='lost' ?
@@ -852,7 +867,6 @@ function drawPlaying()
 
 		if(gameState.screen=='lost' && grid[i].hasMine)
 		{
-			console.log("I LOSE!");
 			ctx.fillStyle = "#ff0000";
 			ctx.font = "bold 14px monospace";
 			ctx.fillRect(px, py,
@@ -905,10 +919,10 @@ function drawGame()
 	gameTime+= timeElapsed;
 
 	// Update game
-	if(gameState.screen != "AIplaying")
-		updateGame();
+	if(gameState.screen == "AIplaying")
+		aiSolver();//updateGame();
 	else{
-		aiSolver();
+		updateGame();
 	}
 	// Frame counting
 	var sec = Math.floor(Date.now()/1000);
