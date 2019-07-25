@@ -36,8 +36,8 @@ var gameState = {
 	newBest		: false,
 	timeTaken	: 0,
 
-	tileW		: 20,
-	tileH		: 20
+	tileW		: 25,
+	tileH		: 25
 };
 var difficulties = {
 	easy	: {
@@ -750,32 +750,32 @@ window.onload = function()
 function drawMenu()
 {
 	ctx.textAlign = 'center';
-	ctx.font = "bold 20pt sans-serif";
+	ctx.font = "bold 26pt sans-serif";
 	ctx.fillStyle = "#000000";
 
-	var y = 100;
+	var y = 180;
 
 	for(var d in difficulties)
 	{
-		var mouseOver = (mouseState.y>=(y-20) && mouseState.y<=(y+10));
+		var mouseOver = (mouseState.y>=(y-30) && mouseState.y<=(y+10));
 
 		if(mouseOver) { ctx.fillStyle = "#000099"; }
 
 		difficulties[d].menuBox = [y-20, y+10];
-		ctx.fillText(difficulties[d].name, 150, y);
+		ctx.fillText(difficulties[d].name, 400, y);
 		y+= 80;
 
 		if(mouseOver) { ctx.fillStyle = "#000000"; }
 	}
 
-	var y = 120;
+	var y = 210;
 	ctx.font = "italic 12pt sans-serif";
 
 	for(var d in difficulties)
 	{
 		if(difficulties[d].bestTime==0)
 		{
-			ctx.fillText("No best time", 150, y);
+			ctx.fillText("No best time", 400, y);
 		}
 		else
 		{
@@ -788,7 +788,7 @@ function drawMenu()
 			}
 			bestTime+= Math.floor(t/1000) +
 				"." + (t%1000);
-			ctx.fillText("Best time   " + bestTime, 150, y);
+			ctx.fillText("Best time   " + bestTime, 400, y);
 		}
 		y+= 80;
 	}
@@ -805,16 +805,18 @@ function drawPlaying()
 	ctx.textBaseline = "bottom";
 
 	ctx.fillStyle = "#000000";
-	ctx.font = "12px sans-serif";
-	ctx.fillText(cDiff.name, 150, 20);
+	ctx.font = "20px Roboto";
+	ctx.fillText(cDiff.name, 400, 30);
 
-	ctx.fillText("Return to menu", 150, 390);
+	ctx.fillStyle = "#1e4c6b";
+	ctx.font = "bold 18px Roboto";
+	ctx.fillText("Return to Menu", 400, 480);
 
 	if(gameState.screen!='lost')
 	{
 		ctx.textAlign = "left";
 		var x = cDiff.mines - flagClickCounter;
-		ctx.fillText("Mines: " + x, 10, 40);
+		ctx.fillText("💣: " + x, 225, 50);
 
 		var whichT = (gameState.screen=='won' ?
 			gameState.timeTaken : gameTime);
@@ -827,7 +829,7 @@ function drawPlaying()
 		t+= (s > 9 ? s : '0' + s);
 
 		ctx.textAlign = "right";
-		ctx.fillText("Time: " + t, 290, 40);
+		ctx.fillText("⏱️: " + Math.round( (whichT / 1000).toPrecision(6), 2) + " s", 560, 50);
 	}
 
 	if(gameState.screen=='lost' || gameState.screen=='won')
@@ -848,7 +850,7 @@ function drawPlaying()
 
 		ctx.fillText(
 			(gameState.screen=='lost' ?
-				"Game Over" : "Cleared!"), 150, offsetY - 15);
+				"Game Over" : "Cleared!"), 400, offsetY - 15);
 	}
 
 	ctx.strokeStyle = "#999999";
@@ -867,12 +869,12 @@ function drawPlaying()
 
 		if(gameState.screen=='lost' && grid[i].hasMine)
 		{
-			ctx.fillStyle = "#ff0000";
+			ctx.fillStyle = "#ff9191";
 			ctx.font = "bold 14px monospace";
 			ctx.fillRect(px, py,
 				gameState.tileW, gameState.tileH);
 			ctx.fillStyle = "#000000";
-			ctx.fillText("⚫", px + halfW, py + halfH);
+			ctx.fillText("💣", px + halfW, py + halfH);
 		}
 		else if(grid[i].currentState=='visible')
 		{
@@ -935,8 +937,10 @@ function drawGame()
 	else { frameCount++; }
 
 	// Clear canvas
-	ctx.fillStyle = "#ddddee";
-	ctx.fillRect(0, 0, 300, 400);
+	ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+	ctx.fillRect(0, 0, 800, 500);
+	ctx.fillStyle = "rgb(240, 20, 20)";
+	ctx.strokeRect(0, 0, 800, 500);
 
 	if(gameState.screen=='menu') { drawMenu(); }
 	else { drawPlaying(); }
@@ -945,7 +949,7 @@ function drawGame()
 	ctx.textAlign = "left";
 	ctx.font = "10pt sans-serif";
 	ctx.fillStyle = "#000000";
-	ctx.fillText("Frames: " + framesLastSecond, 5, 15);
+	ctx.fillText("Framerate: " + framesLastSecond, 20, 20);
 
 	// Update the lastFrameTime
 	lastFrameTime = currentFrameTime;
