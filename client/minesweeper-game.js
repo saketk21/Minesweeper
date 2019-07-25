@@ -515,7 +515,7 @@ function aiSameDangerAndFlaggedNear(){
 
 function aiSameDangerAndHiddenNear(){
 	for(var i in grid){
-		if(grid[i].danger == grid[i].hiddenNear){
+		if(grid[i].danger == grid[i].hiddenNear && grid[i].danger !== 0){
 			console.log("Flagging all hidden: ", grid[i].x, grid[i].y, grid[i].danger, grid[i].hiddenNear);
 			var centerX = grid[i].x;
 			var centerY = grid[i].y;
@@ -560,7 +560,7 @@ function aiFindTargetsUsingLinkedInfo() {
 								for(var m = 0; m < grid[i].allHiddenNeighbours.length; m++) {
 									if(!linkedTilesAdjacentToThis.includes(grid[i].allHiddenNeighbours[m])) {
 										temp = grid[i].allHiddenNeighbours[m];
-										targetsList.add(new Target(temp.x, temp.y, true));
+										targetsList.push(new Target(temp.x, temp.y, true));
 										temp.alreadyTargeted = true;
 									}
 								}
