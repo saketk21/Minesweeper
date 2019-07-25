@@ -17,10 +17,12 @@ var affected = [];
 
 var offsetX = 0, offsetY = 0;
 var grid = [];
+
 var aiCornerCount = 0;
 var aiCorners = [0,0,0,0];
 var aiTargetX = 0, aiTargetY = 0;
 var flagTarget = false;
+var targetsList = [];
 
 var mouseState = {
 	x	: 0,
@@ -283,7 +285,7 @@ function computeTileInfo() {
 					if(grid[idx].currentState === 'hidden') {
 						grid[idx].linkedWith = [];
 						for(var linkedIdx in temp) {
-							linkedWith.push(tmp[linkedIdx]);
+							grid[idx].linkedWith.push(temp[linkedIdx]);
 						}
 						grid[idx].isLinked = true;
 					}
@@ -404,6 +406,12 @@ function startLevel(diff)
 	numberCount = 0;
 	value3BV = 0;
 
+	aiCornerCount = 0;
+	aiCorners = [0,0,0,0];
+	aiTargetX = 0, aiTargetY = 0;
+	flagTarget = false;
+	targetsList = [];
+
 	var cDiff = difficulties[diff];
 
 	offsetX = Math.floor((document.getElementById('game').width -
@@ -471,7 +479,7 @@ function aiClickRandomTile() {
 		}
 		aiCorners[cornerId] = 1;
 		aiCornerCount++;
-		grid[((tile[1] * cDiff.width) + tile[0])].click();
+		grid[((aiTargetY * cDiff.width) + aiTargetX)].click();
 	}
 }
 
@@ -496,7 +504,7 @@ function aiSameDangerAndFlaggedNear(){
 
 					var idx = ((py * cDiff.width) + px);
 					if(grid[idx].currentState=='hidden' && !grid[idx].alreadyTargeted){
-						targetsList.append(new Target(px, py, false));
+						targetsList.push(new Target(px, py, false));
 						grid[idx].alreadyTargeted = true;
 					}
 				}
@@ -508,6 +516,7 @@ function aiSameDangerAndFlaggedNear(){
 function aiSameDangerAndHiddenNear(){
 	for(var i in grid){
 		if(grid[i].danger == grid[i].hiddenNear){
+			console.log("Flagging all hidden: ", grid[i].x, grid[i].y, grid[i].danger, grid[i].hiddenNear);
 			var centerX = grid[i].x;
 			var centerY = grid[i].y;
 			var cDiff = difficulties[gameState.difficulty];
@@ -523,7 +532,7 @@ function aiSameDangerAndHiddenNear(){
 
 					var idx = ((py * cDiff.width) + px);
 					if(grid[idx].currentState=='hidden' && !grid[idx].alreadyTargeted) {
-						targetsList.append(new Target(px, py, true));
+						targetsList.push(new Target(px, py, true));
 						grid[idx].alreadyTargeted = true;
 					}
 				}
@@ -811,6 +820,7 @@ function drawPlaying()
 
 
 		if(gameState.screen == 'won'){
+			console.log("I WIN!");
 			document.getElementById("results").innerHTML = "Results";
 			document.getElementById("noOfClicks").innerHTML = "Total Clicks: "+ totalClickCounter;
 			document.getElementById("3BV").innerHTML = "3BV : "+ value3BV;
@@ -842,6 +852,7 @@ function drawPlaying()
 
 		if(gameState.screen=='lost' && grid[i].hasMine)
 		{
+			console.log("I LOSE!");
 			ctx.fillStyle = "#ff0000";
 			ctx.font = "bold 14px monospace";
 			ctx.fillRect(px, py,
