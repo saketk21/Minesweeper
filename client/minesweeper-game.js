@@ -19,7 +19,8 @@ var offsetX = 0, offsetY = 0;
 var grid = [];
 var aiCornerCount = 0;
 var aiCorners = [0,0,0,0];
-var aiTargetX, aiTargetY;
+var aiTargetX = 0, aiTargetY = 0;
+var flagTarget = false;
 
 var mouseState = {
 	x	: 0,
@@ -62,14 +63,27 @@ var difficulties = {
 	}
 };
 
+function Target(x, y, needToFlag) {
+	this.x = x;
+	this.y = y;
+	this.needToFlag = needToFlag;
+}
+
 function Tile(x, y)
 {
-	this.x			= x;
-	this.y			= y;
-	this.hasMine		= false;
-	this.danger		= 0;
-	this.currentState	= 'hidden';
+	this.x = x;
+	this.y = y;
+	this.hasMine = false;
+	this.danger	= 0;
+	this.currentState = 'hidden';
+
+	// Required information for AI Solver for tile
+	this.alreadyTargeted = false;
 	this.flaggedNear = 0;
+	this.hiddenNear = 0;
+	this.allHiddenNeighbours = [];
+	this.isLinked = false;
+	this.linkedWith = [];
 }
 Tile.prototype.calcDanger = function()
 {
@@ -105,24 +119,6 @@ Tile.prototype.flag = function()
 	else if(this.currentState=='flagged') {
 		flagClickCounter--;
 		this.currentState = 'hidden';
-	}
-	var cDiff = difficulties[gameState.difficulty];
-	for(var py = this.y - 1; py <= this.y + 1; py++)
-	{
-		for(var px = this.x - 1; px <= this.x + 1; px++)
-		{
-			if(px==this.x && py==this.y) { continue; }
-
-			if(px < 0 || py < 0 ||
-				px >= cDiff.width ||
-				py >= cDiff.height)
-			{
-				continue;
-			}
-
-			var idx = ((py * cDiff.width) + px);
-			grid[idx].flaggedNear++;
-		}
 	}
 };
 
@@ -227,6 +223,76 @@ Tile.prototype.revealNeighbours = function()
 		}
 	}
 };
+
+function computeTileInfo() {
+	for(var i in grid) {
+		grid[i].hiddenNear = 0;
+		grid[i].flaggedNear = 0;
+		grid[i].allHiddenNeighbours = [];
+		
+		var centerX = grid[i].x;
+		var centerY = grid[i].y;
+		var cDiff = difficulties[gameState.difficulty];
+		for(var py = centerY - 1; py <= centerY + 1; py++)
+		{
+			for(var px = centerX - 1; px <= centerX + 1; px++)
+			{
+				if(px==centerX && py==centerY) { continue; }
+
+				if(px < 0 || py < 0 || px >= cDiff.width || py >= cDiff.height) {
+					continue;
+				}
+
+				var idx = ((py * cDiff.width) + px);
+				if(grid[idx].currentState === 'hidden') {
+					grid[i].hiddenNear += 1;
+					grid[i].allHiddenNeighbours.push(grid[idx]);
+				}
+				if(grid[idx].currentState === 'flagged') {
+					grid[i].flaggedNear += 1;
+				}
+			}
+		}
+	}
+
+	for(var i in grid) {
+		var centerX = grid[i].x;
+		var centerY = grid[i].y;
+		var cDiff = difficulties[gameState.difficulty];
+		
+		if(grid[i].danger - grid[i].flaggedNear === 1 && grid[i].hiddenNear !== 1) {
+			var temp = [];
+			for(py = centerY - 1; py <= centerY + 1; py++) {
+				for(px = centerX - 1; px <= centerX + 1; px++) {
+					if(px == centerX && py == centerY) { continue; }
+					if(px < 0 || py < 0 || px >= cDiff.width || py >= cDiff.height)
+						continue;
+					var idx = ((py * cDiff.width) + px);
+					if(grid[idx].currentState === 'hidden') {
+						temp.push(grid[idx]);
+					}
+
+				}
+			}
+			for(py = centerY - 1; py <= centerY + 1; py++) {
+				for(px = centerX - 1; px <= centerX + 1; px++) {
+					if(px == centerX && py == centerY) { continue; }
+					if(px < 0 || py < 0 || px >= cDiff.width || py >= cDiff.height)
+						continue;
+					var idx = ((py * cDiff.width) + px);
+					if(grid[idx].currentState === 'hidden') {
+						grid[idx].linkedWith = [];
+						for(var linkedIdx in temp) {
+							linkedWith.push(tmp[linkedIdx]);
+						}
+						grid[idx].isLinked = true;
+					}
+				}
+			}
+
+		}
+	}
+}
 
 function checkState()
 {
@@ -380,8 +446,9 @@ function startLevel(diff)
 	value3BV = depressedAreas + numberCount;
 }
 
-function aiClickCorner(){
+function aiClickRandomTile() {
 	var cDiff = difficulties[gameState.difficulty];
+	// start by clicking corners
 	var cornerId = Math.floor(Math.random() * 4);
 	if(aiCorners[cornerId]==0){
 		switch(cornerId){
@@ -404,8 +471,6 @@ function aiClickCorner(){
 		}
 		aiCorners[cornerId] = 1;
 		aiCornerCount++;
-		var tile = [aiTargetX,aiTargetY];
-		console.log(aiTargetX +", "+ aiTargetY);
 		grid[((tile[1] * cDiff.width) + tile[0])].click();
 	}
 }
@@ -430,9 +495,9 @@ function aiSameDangerAndFlaggedNear(){
 					}
 
 					var idx = ((py * cDiff.width) + px);
-					if(grid[idx].currentState=='hidden'){
-						grid[idx].click();
-						console.log("I am clicking");
+					if(grid[idx].currentState=='hidden' && !grid[idx].alreadyTargeted){
+						targetsList.append(new Target(px, py, false));
+						grid[idx].alreadyTargeted = true;
 					}
 				}
 			}
@@ -442,46 +507,24 @@ function aiSameDangerAndFlaggedNear(){
 
 function aiSameDangerAndHiddenNear(){
 	for(var i in grid){
-		var hiddenNear = 0;
-		var centerX = grid[i].x;
-		var centerY = grid[i].y;
-		var cDiff = difficulties[gameState.difficulty];
-		for(var py = centerY - 1; py <= centerY + 1; py++)
-		{
-			for(var px = centerX - 1; px <= centerX + 1; px++)
-			{
-				if(px==centerX && py==centerY) { continue; }
-
-				if(px < 0 || py < 0 ||
-					px >= cDiff.width ||
-					py >= cDiff.height)
-				{
-					continue;
-				}
-
-				var idx = ((py * cDiff.width) + px);
-				if(grid[idx].currentState=='hidden'){
-					hiddenNear++;
-				}
-			}
-		}
-		if(grid[i].danger == hiddenNear){
+		if(grid[i].danger == grid[i].hiddenNear){
+			var centerX = grid[i].x;
+			var centerY = grid[i].y;
+			var cDiff = difficulties[gameState.difficulty];
 			for(var py = centerY - 1; py <= centerY + 1; py++)
 			{
 				for(var px = centerX - 1; px <= centerX + 1; px++)
 				{
 					if(px==centerX && py==centerY) { continue; }
 
-					if(px < 0 || py < 0 ||
-						px >= cDiff.width ||
-						py >= cDiff.height)
-					{
+					if(px < 0 || py < 0 || px >= cDiff.width || py >= cDiff.height) {
 						continue;
 					}
 
 					var idx = ((py * cDiff.width) + px);
-					if(grid[idx].currentState=='hidden'){
-						grid[idx].currentState = 'flagged';
+					if(grid[idx].currentState=='hidden' && !grid[idx].alreadyTargeted) {
+						targetsList.append(new Target(px, py, true));
+						grid[idx].alreadyTargeted = true;
 					}
 				}
 			}
@@ -489,16 +532,102 @@ function aiSameDangerAndHiddenNear(){
 	}
 }
 
-function aiSolver(){
-	if(aiCornerCount != 4){
-		aiClickCorner();
-	}
-	else{
-		setTimeout(aiSameDangerAndFlaggedNear, 3000);//aiSameDangerAndFlaggedNear();		//click on remaining hidden tiles
-		//aiSameDangerAndHiddenNear();		//flag on remaining hidden tiles
+function aiFindTargetsUsingLinkedInfo() {
+	for(var i in grid) {
+		if(grid[i].currentState === 'visible') {
+			if(grid[i].danger !== 1 && grid[i].danger !== 0 && grid[i].danger - grid[i].flaggedNear > 1) {
+				for(var k = 0; k < grid[i].allHiddenNeighbours.length; k++) {
+					if(grid[i].allHiddenNeighbours[k].isLinked) {
+						var numberOfLinked = 0;
+						linkedTilesAdjacentToThis = [];
+						for(var l = 0; l < grid[i].allHiddenNeighbours[k].linkedWith.length; l++) {
+							if(grid[i].allHiddenNeighbours.includes(grid[i].allHiddenNeighbours[k].linkedWith[l])) {
+								numberOfLinked += 1;
+								linkedTilesAdjacentToThis.push(grid[i].allHiddenNeighbours[k].linkedWith[l]);
+							}
+						}
+						if(numberOfLinked > 1) {
+							if(grid[i].hiddenNear - (numberOfLinked - 1) === grid[i].danger) {
+								for(var m = 0; m < grid[i].allHiddenNeighbours.length; m++) {
+									if(!linkedTilesAdjacentToThis.includes(grid[i].allHiddenNeighbours[m])) {
+										temp = grid[i].allHiddenNeighbours[m];
+										targetsList.add(new Target(temp.x, temp.y, true));
+										temp.alreadyTargeted = true;
+									}
+								}
+							}
+							return;
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
+function aiSolver() {
+	var cDiff = difficulties[gameState.difficulty];
+
+	// Make a move
+	var tempTile = grid[aiTargetY * cDiff.width + aiTargetX];
+	if(!flagTarget) {
+		if(tempTile.currentState === 'flagged') {
+			console.log("Incorrect click attempt.");
+		}
+		else {
+			tempTile.click();
+		}
+	}
+	else {
+		if(tempTile.currentState !== 'flagged') {
+			tempTile.flag();
+		}
+	}
+
+	// Recompute Tile Info due to newly revealed information
+	computeTileInfo();
+
+	// Remove any tiles which are present in targetsList if they have been revealed
+	// This will save a click
+	for(var i = 0; i < targetsList.length; i++) {
+		tempTile2 = grid[ targetsList[i].y * cDiff.width + targetsList[i].x ];
+		if(tempTile2.currentState !== 'hidden') {
+			targetsList.splice(i);
+			i--;
+		}
+	}
+
+	// Get the next target from the targetsList
+	if(targetsList.length !== 0) {
+		aiTargetX = targetsList[0].x;
+		aiTargetY = targetsList[0].y;
+
+		if(targetsList[0].needToFlag)
+			flagTarget = true;
+		else
+			flagTarget = false;
+		targetsList.shift();
+	}
+	else {		// All previously computed targets have been exhausted
+		findNewTarget();
+	}
+}
+
+// Use obtained information to determine whether any new targets are generated
+function findNewTarget() {
+	// Any tile having equal danger and hidden tiles -> All hidden tiles are mines
+	aiSameDangerAndHiddenNear();
+	// Any tile having equal danger and flagged tiles -> All hidden tiles are safe
+	aiSameDangerAndFlaggedNear();
+	// If still no new targets revealed - check using linked configurations
+	if(targetsList.length === 0)
+		aiFindTargetsUsingLinkedInfo();
+	// Even if there's still no new targets - All hope lost, random guess
+	if(targetsList.length === 0)
+		aiClickRandomTile();
+}
+
+// updateGame handles the mouse clicks on the board made by the player
 function updateGame()
 {
 	if(gameState.screen=='menu')
@@ -768,7 +897,7 @@ function drawGame()
 	if(gameState.screen != "AIplaying")
 		updateGame();
 	else{
-		setTimeout(aiSolver, 1000);//aiSolver();//
+		aiSolver();
 	}
 	// Frame counting
 	var sec = Math.floor(Date.now()/1000);
