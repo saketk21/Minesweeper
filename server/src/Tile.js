@@ -16,6 +16,9 @@ let Tile = function ( x, y ) {
 	this.isLinked = 0;
 	this.linkedWith = [];
 
+	this.placeMine = function () {
+		this.hasMine = true;
+	}
 	// Called when left-click on Tile is done
 	this.revealTile = function () {
 		if ( this.hidden && !this.isFlagged ) {
