@@ -1,8 +1,8 @@
 const tileTypes = {
-	HIDDEN: -1,
-	FLAGGED: -2,
-	MINE_CLICKED: -99,
-	VISIBLE: 99
+	HIDDEN: 'hidden',
+	FLAGGED: 'flagged',
+	MINE_CLICKED: 'mineClicked',
+	VISIBLE: 'visible'
 };
 
 module.exports = tileTypes;

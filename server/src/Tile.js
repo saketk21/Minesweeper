@@ -33,7 +33,7 @@ let Tile = function ( x, y ) {
 			return tileTypes.VISIBLE;
 		}
 		return tileTypes.FLAGGED;
-	}
+	};
 
 	this.flagOrUnflagTile = function () {
 		// Only hidden tiles can be flagged or unflagged
@@ -50,7 +50,7 @@ let Tile = function ( x, y ) {
 			}
 		}
 		return tileTypes.VISIBLE;
-	}
+	};
 }
 
 module.exports = Tile;
