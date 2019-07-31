@@ -21,35 +21,37 @@ let Tile = function ( x, y ) {
 	}
 	// Called when left-click on Tile is done
 	this.revealTile = function () {
+		var returnValue = tileTypes.FLAGGED;
 		if ( this.hidden && !this.isFlagged ) {
 			// Clicked on tile which has mine, return MINE_CLICKED for game over
 			if ( this.hasMine )
-				return tileTypes.MINE_CLICKED;
+				returnValue = tileTypes.MINE_CLICKED;
 			// Tile is hidden, not flagged and doesn't have mine, so return danger value
 			this.hidden = false;
-			return this.danger;
+			returnValue = this.danger;
 		} else if ( !this.hidden ) {
 			// Clicked on visible tile, return VISIBLE enum value for chording
-			return tileTypes.VISIBLE;
+			returnValue = tileTypes.VISIBLE;
 		}
-		return tileTypes.FLAGGED;
+		return returnValue;
 	};
 
 	this.flagOrUnflagTile = function () {
+		var returnValue = tileTypes.VISIBLE;
 		// Only hidden tiles can be flagged or unflagged
 		if ( this.hidden ) {
 			// If already flagged, unflag
 			if ( this.isFlagged ) {
 				this.isFlagged = false;
-				return tileTypes.HIDDEN;
+				returnValue = tileTypes.HIDDEN;
 			}
 			// Flag tile
 			else {
 				this.isFlagged = true;
-				return tileTypes.FLAGGED;
+				returnValue = tileTypes.FLAGGED;
 			}
 		}
-		return tileTypes.VISIBLE;
+		return returnValue;
 	};
 }
 
