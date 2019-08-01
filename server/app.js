@@ -8,7 +8,9 @@ const morgan = require( 'morgan' )
 const path = require( 'path' )
 const socketIO = require( 'socket.io' )
 const Constants = require( './src/Constants' )
+const Game = require( './src/Game.js' );
 const gameStates = require( './src/GameStates.js' )
+const AI = require( './src/AI.js' );
 
 // Initialization
 const app = express()
@@ -16,6 +18,7 @@ const server = http.Server( app )
 const io = socketIO( server )
 // const gameRoom = new GameRoom()
 let socketToGameMap = new Map()
+let socketToAIMap = new Map()
 
 
 app.set( 'port', PORT )
@@ -41,8 +44,11 @@ io.on( 'connection', socket => {
 	socket.on( Constants.SOCKET_NEW_GAME, data => {
 		// Create Game object for the new game
 		let newGame = new Game();
+		let ai = new AI();
 		newGame.init();
+		ai.init( newGame );
 		socketToGameMap.set( socket.id, newGame );
+		socketToAIMap.set( socket.id, ai );
 
 	} )
 
@@ -88,9 +94,8 @@ io.on( 'connection', socket => {
 	} )
 
 	socket.on( Constants.SOCKET_AI_ACTION, data => {
-		let gameOfThisSocket = socketToGameMap.get( socket.id );
-		let newBoardConfig = gameOfThisSocket.handleAutoMove();
-		let gameState = gameOfThisSocket.getGameState();
+		let aiOfThisSocket = socketToAIMap.get( socket.id );
+		let gameState = aiOfThisSocket.aiSolve();
 		socket.emit( Constants.SOCKET_CURRENT_STATE, {
 			'newBoardConfig': newBoardConfig,
 			'gameState': gameState

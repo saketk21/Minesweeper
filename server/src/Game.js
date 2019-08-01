@@ -17,10 +17,10 @@ let Game = function () {
 		this.board.initGrid();
 	};
 
-	this.hasWon = function() {
+	this.hasWon = function () {
 		for ( var x = 0; x < this.board.width; x++ ) {
 			for ( var y = 0; y < this.board.height; y++ ) {
-				if(this.board.grid[x][y].hidden && !this.board.grid[x][y].hasMine)
+				if ( this.board.grid[ x ][ y ].hidden && !this.board.grid[ x ][ y ].hasMine )
 					return;
 			}
 		}
@@ -53,7 +53,7 @@ let Game = function () {
 		}
 	};
 
-	this.revealNeighbours = function (x, y) {
+	this.revealNeighbours = function ( x, y ) {
 		for ( var dx = x - 1; dx <= x + 1; dx++ ) {
 			for ( var dy = y - 1; dy <= y + 1; dy++ ) {
 				if ( dx == x && dy == y )
@@ -61,9 +61,9 @@ let Game = function () {
 				if ( dx < 0 || dx > this.width || dy < 0 || dy > this.height )
 					continue;
 				if ( this.board.grid[ dx ][ dy ].hidden ) {
-					let clickStatus = this.revealTile(dx, dy);
-					if(clickStatus === 0) {
-						this.revealNeighbours(dx, dy);
+					let clickStatus = this.revealTile( dx, dy );
+					if ( clickStatus === 0 ) {
+						this.revealNeighbours( dx, dy );
 					}
 				}
 			}
@@ -86,7 +86,7 @@ let Game = function () {
 	};
 
 	this.handleFlag = function ( x, y ) {
-		this.board.grid[x][y].flagOrUnflagTile();
+		this.board.grid[ x ][ y ].flagOrUnflagTile();
 		return this.board.toString();
 	}
 
