@@ -7,7 +7,7 @@ const http = require( 'http' )
 const morgan = require( 'morgan' )
 const path = require( 'path' )
 const socketIO = require( 'socket.io' )
-const Constants = require( './src/Constants' )
+const Constants = require( './../lib/Constants.js' )
 const gameStates = require( './src/GameStates.js' )
 
 // Initialization
@@ -99,15 +99,6 @@ io.on( 'connection', socket => {
 
 	socket.on( Constants.SOCKET_DISCONNECT, () => {} )
 } )
-
-/**
- * Server side game loop, runs at 60Hz and sends out update packets to all
- * clients every update.
- */
-setInterval( () => {
-	gameRoom.update()
-	gameRoom.sendState()
-}, FRAME_RATE )
 
 // Starts the server.
 server.listen( PORT, () => {
