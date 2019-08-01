@@ -16,6 +16,9 @@ let Tile = function ( x, y ) {
 	this.isLinked = 0;
 	this.linkedWith = [];
 
+	//following members are required by AI
+	this.allHiddenNeighbours = [];
+
 	this.placeMine = function () {
 		this.hasMine = true;
 	}
