@@ -18,6 +18,7 @@ let Tile = function ( x, y ) {
 
 	//following members are required by AI
 	this.allHiddenNeighbours = [];
+	this.alreadyTargeted = false;
 
 	this.placeMine = function () {
 		this.hasMine = true;
