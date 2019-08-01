@@ -8,6 +8,7 @@ const morgan = require( 'morgan' )
 const path = require( 'path' )
 const socketIO = require( 'socket.io' )
 const Constants = require( './src/Constants' )
+const gameStates = require( './src/GameStates.js' )
 
 // Initialization
 const app = express()
@@ -40,6 +41,8 @@ io.on( 'connection', socket => {
 	socket.on( Constants.SOCKET_NEW_GAME, data => {
 		// Create Game object for the new game
 		let newGame = new Game();
+		newGame.init();
+		socketToGameMap.set( socket.id, newGame );
 
 	} )
 
@@ -68,21 +71,30 @@ io.on( 'connection', socket => {
 		let newBoardConfig = gameOfThisSocket.handleClick( data.x, data.y );
 		let gameState = gameOfThisSocket.getGameState();
 		// Emit appropriate event based on gameState
+		socket.emit( Constants.SOCKET_CURRENT_STATE, {
+			'newBoardConfig': newBoardConfig,
+			'gameState': gameState
+		} );
 	} )
 
 	socket.on( Constants.SOCKET_FLAG_ACTION, data => {
 		let gameOfThisSocket = socketToGameMap.get( socket.id );
 		let newBoardConfig = gameOfThisSocket.handleFlag( data.x, data.y );
 		let gameState = gameOfThisSocket.getGameState();
-
+		socket.emit( Constants.SOCKET_CURRENT_STATE, {
+			'newBoardConfig': newBoardConfig,
+			'gameState': gameState
+		} );
 	} )
 
 	socket.on( Constants.SOCKET_AI_ACTION, data => {
 		let gameOfThisSocket = socketToGameMap.get( socket.id );
 		let newBoardConfig = gameOfThisSocket.handleAutoMove();
 		let gameState = gameOfThisSocket.getGameState();
-
-
+		socket.emit( Constants.SOCKET_CURRENT_STATE, {
+			'newBoardConfig': newBoardConfig,
+			'gameState': gameState
+		} );
 	} )
 
 	socket.on( Constants.SOCKET_DISCONNECT, () => {} )

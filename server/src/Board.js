@@ -17,7 +17,6 @@ let Board = function ( width, height, mineCount ) {
 				grid[ y ].push( new Tile( x, y ) );
 			}
 		}
-		this.gameState = gameStates.IN_PROGRESS;
 		this.placeMines();
 		this.calcDanger();
 	};
@@ -39,16 +38,36 @@ let Board = function ( width, height, mineCount ) {
 			for ( var y = 0; y < this.height; y++ ) {
 				for ( var dx = x - 1; dx <= x + 1; dx++ ) {
 					for ( var dy = y - 1; dy <= y + 1; dy++ ) {
-						if ( dx == 0 && dy == 0 )
+						if ( dx == x && dy == y )
 							continue;
-						if ( x + dx < 0 || x + dx > this.width || y + dy < 0 || y + dy > this.height )
+						if ( dx < 0 || dx > this.width || dy < 0 || dy > this.height )
 							continue;
-						if ( grid[ x + dx ][ y + dy ].hasMine )
+						if ( grid[ dx ][ dy ].hasMine )
 							grid[ x ][ y ].danger += 1;
 					}
 				}
 			}
 		}
+	};
+
+	this.toString = function () {
+		let stringrepr = '';
+		for ( var y = 0; y < this.height; y++ ) {
+			for ( var x = 0; x < this.width; x++ ) {
+				let currentTile = this.grid[ x ][ y ];
+				if ( currentTile.hidden ) {
+					if ( currentTile.isFlagged )
+						stringrepr += 'F';
+					else
+						stringrepr += 'H';
+				}
+				if ( currentTile.danger >= 0 ) {
+					stringrepr += '' + currentTile.danger;
+				}
+			}
+			stringrepr += '/';
+		}
+		return stringrepr;
 	};
 }
 
