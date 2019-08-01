@@ -6,7 +6,7 @@ let Board = function ( width, height, mineCount ) {
 	this.height = height;
 	this.mineCount = mineCount;
 	this.grid = [];
-	
+
 	this.initGrid = function () {
 		this.grid = new Array();
 		for ( let y = 0; y < this.height; y++ ) {
@@ -30,7 +30,7 @@ let Board = function ( width, height, mineCount ) {
 				mineX = Math.floor( Math.random() * this.width );
 				mineY = Math.floor( Math.random() * this.height );
 			} while ( grid[ mineX ][ mineY ].hasMine );
-			grid[ mineX ][ mineY ].hasMine = true;
+			grid[ mineX ][ mineY ].placeMine();
 		}
 	};
 
@@ -51,3 +51,5 @@ let Board = function ( width, height, mineCount ) {
 		}
 	};
 }
+
+module.exports = Board;

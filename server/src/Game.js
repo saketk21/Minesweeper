@@ -1,5 +1,6 @@
 const difficulties = require( './Difficulties.js' );
 const gameStates = require( './GameStates.js' );
+const tileTypes = require( './TileTypes.js' );
 
 let Game = function () {
 	this.board = null;
@@ -17,10 +18,23 @@ let Game = function () {
 
 	this.handleClick = function ( x, y ) {
 		// Will return board config after the click action
+		let clickStatus = this.board.grid[ x ][ y ].revealTile();
+		if ( clickStatus === tileTypes.MINE_CLICKED ) {
+			this.gameState = gameStates.LOSE;
+		} else if ( clickStatus === tileTypes.VISIBLE ) {
+			// Chording
+			this.board.chord( x, y );
+		} else if ( clickStatus == 0 ) {
+			this.board.revealNeighbours( x, y );
+		}
 	};
 
 	this.handleFlag = function ( x, y ) {
 		// Will return board config after the flag action
+	}
+
+	this.handleAutoMove = function () {
+		// Will return board config after the AI's action and also handle state change
 	}
 
 	this.getGameState = function () {

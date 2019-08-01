@@ -28,6 +28,10 @@ app.get( '/', ( request, response ) => {
 	response.sendFile( path.join( __dirname, 'src/views/index.html' ) )
 } )
 
+app.get( '/leaderboard', ( request, response ) => {
+	response.sendFile( path.join( __dirname, 'src/views/leaderboard.html' ) )
+} )
+
 /**
  * Server side input handler, modifies the state of the players and the
  * gameRoom based on the input it receives.
@@ -63,7 +67,22 @@ io.on( 'connection', socket => {
 		let gameOfThisSocket = socketToGameMap.get( socket.id );
 		let newBoardConfig = gameOfThisSocket.handleClick( data.x, data.y );
 		let gameState = gameOfThisSocket.getGameState();
-		socket.emit
+		// Emit appropriate event based on gameState
+	} )
+
+	socket.on( Constants.SOCKET_FLAG_ACTION, data => {
+		let gameOfThisSocket = socketToGameMap.get( socket.id );
+		let newBoardConfig = gameOfThisSocket.handleFlag( data.x, data.y );
+		let gameState = gameOfThisSocket.getGameState();
+
+	} )
+
+	socket.on( Constants.SOCKET_AI_ACTION, data => {
+		let gameOfThisSocket = socketToGameMap.get( socket.id );
+		let newBoardConfig = gameOfThisSocket.handleAutoMove();
+		let gameState = gameOfThisSocket.getGameState();
+
+
 	} )
 
 	socket.on( Constants.SOCKET_DISCONNECT, () => {} )
