@@ -1,0 +1,31 @@
+{
+  "name": "minesweeper",
+  "version": "1.0.0",
+  "description": "A web-based minesweeper game with an AI solver component",
+  "main": "server/app.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saketk21/Minesweeper.git"
+  },
+  "author": "Saket Kulkarni",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/saketk21/Minesweeper/issues"
+  },
+  "homepage": "https://github.com/saketk21/Minesweeper#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "jquery": "^3.4.1",
+    "socket.io": "^2.2.0",
+    "webpack-cli": "^3.3.6"
+  },
+  "devDependencies": {
+    "webpack": "^4.39.0"
+  }
+}
