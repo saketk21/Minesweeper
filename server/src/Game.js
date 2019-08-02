@@ -4,10 +4,14 @@ const tileTypes = require( './TileTypes.js' );
 
 let Game = function () {
 	this.board = null;
+	this.playerName = null;
 	this.socket = null;
 	this.gameState = gameStates.NOT_STARTED;
+	this.startTime = null;
+	this.timeTaken = null;
 
-	this.init = function ( socket, difficulty ) {
+	this.init = function ( playerName, socket, difficulty ) {
+		this.playerName = playerName;
 		this.socket = socket;
 		this.difficulty = difficulty;
 		// Create source board based on gameRoom parameters
@@ -15,6 +19,7 @@ let Game = function () {
 		this.board = new Board( currentDifficulty.width, currentDifficulty.height, currentDifficulty.mineCount );
 		this.gameState = gameStates.IN_PROGRESS;
 		this.board.initGrid();
+		this.startTime = Date.now();
 	};
 
 	this.hasWon = function () {
@@ -25,6 +30,7 @@ let Game = function () {
 			}
 		}
 		this.gameState = gameStates.WIN;
+		this.timeTaken = Date.now() - startTime;
 	};
 
 	this.chord = function ( x, y, tileDanger ) {
@@ -93,6 +99,10 @@ let Game = function () {
 	this.getGameState = function () {
 		return gameState;
 	}
+
+	this.updateStatistics = function () {
+
+	};
 }
 
 module.exports = Game;

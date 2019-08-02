@@ -45,7 +45,7 @@ io.on( 'connection', socket => {
 		// Create Game object for the new game
 		let newGame = new Game();
 		let ai = new AI();
-		newGame.init();
+		newGame.init(data.playerName, socket, data.difficulty);
 		ai.init( newGame );
 		socketToGameMap.set( socket.id, newGame );
 		socketToAIMap.set( socket.id, ai );
@@ -77,6 +77,18 @@ io.on( 'connection', socket => {
 		let newBoardConfig = gameOfThisSocket.handleClick( data.x, data.y );
 		let gameState = gameOfThisSocket.getGameState();
 		// Emit appropriate event based on gameState
+		if ( gameState === gameStates.WIN ) {
+			socket.emit( Constants.SOCKET_WIN_STATE, {
+				'newBoardConfig': newBoardConfig,
+				'gameState': gameState,
+			} );
+			gameOfThisSocket.updateStatistics();
+		} else if ( gameState === gameStates.LOSE ) {
+			socket.emit( Constants.SOCKET_LOSE_STATE, {
+				'newBoardConfig': newBoardConfig,
+				'gameState': gameState,
+			} );
+		}
 		socket.emit( Constants.SOCKET_CURRENT_STATE, {
 			'newBoardConfig': newBoardConfig,
 			'gameState': gameState
@@ -97,6 +109,19 @@ io.on( 'connection', socket => {
 		let aiOfThisSocket = socketToAIMap.get( socket.id );
 		let newBoardConfig = aiOfThisSocket.aiSolve();
 		let gameState = gameOfThisSocket.getGameState();
+
+		if ( gameState === gameStates.WIN ) {
+			socket.emit( Constants.SOCKET_WIN_STATE, {
+				'newBoardConfig': newBoardConfig,
+				'gameState': gameState,
+			} );
+			gameOfThisSocket.updateStatistics();
+		} else if ( gameState === gameStates.LOSE ) {
+			socket.emit( Constants.SOCKET_LOSE_STATE, {
+				'newBoardConfig': newBoardConfig,
+				'gameState': gameState,
+			} );
+		}
 		socket.emit( Constants.SOCKET_CURRENT_STATE, {
 			'newBoardConfig': newBoardConfig,
 			'gameState': gameState
