@@ -19,15 +19,16 @@ let AI = function () {
     };
 
     this.aiSolve = function () {
+        let newBoardConfig = null;
         if ( !flagTarget ) { // Make a move
             if ( this.game.board.grid[ this.aiTargetX ][ this.aiTargetY ].isFlagged == true ) {
                 console.log( "Incorrect click attempt." );
             } else {
-                this.game.handleClick( this.aiTargetX, this.aiTargetY );
+                newBoardConfig = this.game.handleClick( this.aiTargetX, this.aiTargetY );
             }
         } else {
             if ( this.game.board.grid[ this.aiTargetX ][ this.aiTargetY ].isFlagged == false ) {
-                this.game.handleFlag( this.aiTargetX, this.aiTargetY );
+                newBoardConfig = this.game.handleFlag( this.aiTargetX, this.aiTargetY );
             }
         }
 
@@ -59,6 +60,7 @@ let AI = function () {
         } else { // All previously computed targets have been exhausted
             this.findNewTarget();
         }
+        return newBoardConfig;
     };
 
     //Recomputes various attributes for each tile in the grid after each click or flag

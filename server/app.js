@@ -95,7 +95,8 @@ io.on( 'connection', socket => {
 
 	socket.on( Constants.SOCKET_AI_ACTION, data => {
 		let aiOfThisSocket = socketToAIMap.get( socket.id );
-		let gameState = aiOfThisSocket.aiSolve();
+		let newBoardConfig = aiOfThisSocket.aiSolve();
+		let gameState = gameOfThisSocket.getGameState();
 		socket.emit( Constants.SOCKET_CURRENT_STATE, {
 			'newBoardConfig': newBoardConfig,
 			'gameState': gameState

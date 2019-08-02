@@ -90,10 +90,6 @@ let Game = function () {
 		return this.board.toString();
 	}
 
-	this.handleAutoMove = function () {
-		// Will return board config after the AI's action and also handle state change
-	}
-
 	this.getGameState = function () {
 		return gameState;
 	}
