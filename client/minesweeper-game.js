@@ -23,6 +23,8 @@ var offsetX = 0,
 	offsetY = 0;
 var grid = [];
 
+var bombsLeft = 0;
+var totalArrangements = 0;
 var aiCornerCount = 0;
 var aiCorners = [ 0, 0, 0, 0 ];
 var aiTargetX = 0,
@@ -93,6 +95,8 @@ function Tile( x, y ) {
 	this.currentState = 'hidden'; //defines whether tile is hidden or flagged or visible
 
 	// Required information for AI Solver for tile
+	this.unknown = false;
+	this.probabilityCount = 0;
 	this.alreadyTargeted = false;
 	this.flaggedNear = 0; //No of neighbouring flagged tiles
 	this.hiddenNear = 0; //No of neighbouring hidden tiles
@@ -130,9 +134,11 @@ Tile.prototype.flag = function () {
 	if ( this.currentState == 'hidden' ) {
 		flagClickCounter++;
 		this.currentState = 'flagged';
+		bombsLeft--;
 	} else if ( this.currentState == 'flagged' ) {
 		flagClickCounter--;
 		this.currentState = 'hidden';
+		bombsLeft++;
 	}
 };
 
@@ -434,6 +440,8 @@ function startLevel( diff ) {
 
 	var cDiff = difficulties[ diff ];
 
+	bombsLeft = cDiff.mines;
+
 	offsetX = Math.floor( ( document.getElementById( 'game' ).width -
 		( cDiff.width * gameState.tileW ) ) / 2 );
 
@@ -475,9 +483,283 @@ function startLevel( diff ) {
 	value3BV = depressedAreas + numberCount;
 }
 
-//method used by our AI solver to click on the corners of the Board if it finds no other better action to perform
-function aiClickRandomTile() {
+//add all connected tiles to the section
+function addConnected( section, i, j ) {
 	var cDiff = difficulties[ gameState.difficulty ];
+	section.push( grid[ ( j * cDiff.width ) + i ] );
+	for ( var m = 0; m < cDiff.width; m++ ) {
+		for ( var n = 0; n < cDiff.height; n++ ) {
+			var idx = ( n * cDiff.width ) + m;
+			if ( grid[ idx ].currentState != 'hidden' && grid[ idx ].currentState != 'flagged' && !section.includes( grid[ idx ] ) ) {
+				for ( var k = 0; k < grid[ idx ].allHiddenNeighbours.length; k++ ) {
+					if ( grid[ idx ].allHiddenNeighbours.includes( grid[ idx ].allHiddenNeighbours[ k ] ) ) {
+						addConnected( section, m, n );
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
+//returns whether or not this checking array(an array of tiles which will be bombs) is a viable option 
+function solution( checking, section ) {
+	for ( var i = 0; i < section.length; i++ ) {
+		var count = 0;
+		for ( var j = 0; j < section[ i ].allHiddenNeighbours.length; j++ ) {
+			if ( checking.includes( section[ i ].allHiddenNeighbours[ j ] ) ) { //count the number of the hidden tiles near the tile that are in the tested solution
+				count++;
+			}
+		}
+		if ( count != section[ i ].danger - section[ i ].flaggedNear ) { //if the number of boombs that the tile (in section) needs to be finished is not = count then this is not a solution
+			return false;
+		}
+	}
+	return true;
+}
+
+//returns whether or not this checkign array (an array of tiles which will be bombs) has already violated the section,
+//i.e  if any of the tiles have more bombs then it says on the tile
+//might need to add more to violated like when there isnt enough bombs
+function violated( checking, checkingInt, hiddens, section ) {
+	for ( var i = 0; i < section.length; i++ ) {
+		var count = 0;
+		var missed = 0;
+		for ( var j = 0; j < section[ i ].allHiddenNeighbours.length; j++ ) {
+			if ( checking.includes( section[ i ].allHiddenNeighbours[ j ] ) ) { //count the number of the hidden tiles near the tile that are in the tested solution
+				count++;
+			} else {
+				if ( hiddens.indexOf( section[ i ].allHiddenNeighbours[ j ] ) < checkingInt[ checkingInt.length - 1 ] ) {
+					//if the tile has been missed then count it as missed
+					missed++;
+				}
+			}
+		}
+		if ( count > section[ i ].danger - section[ i ].flaggedNear ) { //if the number of boombs that the tile (in section) needs to be finished is less then count then it is violated 
+			return true;
+		}
+		if ( section[ i ].danger - section[ i ].flaggedNear > section[ i ].hiddenNear - missed ) { //if the number of bombs required is less than the amout of spaces left unmissed then you fucked up
+			return true;
+		}
+	}
+
+	return false; //still good
+}
+
+//returns all the bomb arrangemnets possible in this section
+function getSolutions( section ) {
+	hiddensInSection = [];
+	for ( var i = 0; i < section.length; i++ ) {
+		for ( var j = 0; j < section[ i ].allHiddenNeighbours.length; j++ ) {
+			//add all the hidden tiles in this section to a list
+			if ( !hiddensInSection.includes( section[ i ].allHiddenNeighbours[ j ] ) ) {
+				hiddensInSection.push( section[ i ].allHiddenNeighbours[ j ] );
+			}
+		}
+	}
+
+	solutions = [];
+	big = [];
+	checking = [];
+	checkingInt = [];
+	tempList = [];
+
+	for ( var i = 0; i < hiddensInSection.length; i++ ) {
+		checkingInt = [];
+		checkingInt.push( i );
+		big.push( checkingInt );
+	}
+
+	while ( true ) {
+		if ( big.length != 0 ) {
+			checkingInt = big.pop();
+		} else { //once there are no more options to check
+			break;
+		}
+
+		checking = [];
+		for ( var i = 0; i < checkingInt.length; i++ ) {
+			checking.push( hiddensInSection[ checkingInt[ i ] ] );
+		}
+
+		if ( solution( checking, section ) ) {
+			solutions.push( checking );
+		} else { //checking is not a solution
+			//if its voilated the ruiles of minesweeper then ignore it
+			//if the checking list has not yet voilated the section then add more bombs to it
+			if ( !violated( checking, checkingInt, hiddensInSection, section ) ) {
+				for ( var i = checkingInt[ checkingInt.length - 1 ] + 1; i < hiddensInSection.length; i++ ) { //extend checking by one number with all possible ones
+					tempList = JSON.parse( JSON.stringify( checkingInt ) );
+					tempList.push( i );
+					big.push( tempList );
+				}
+			}
+		}
+	}
+
+	return solutions;
+}
+
+//factorial
+function fact( n ) {
+	if ( n == 1 ) {
+		return 1;
+	} else {
+		result = n;
+		result *= ( fact( n - 1 ) );
+		return result;
+	}
+}
+
+function numberOfCombinations( n, r ) { //used for nCr
+	if ( r == 0 ) {
+		return 1;
+	}
+	result = 1;
+	for ( var i = 0; i < r; i++ ) {
+		result *= ( n - i );
+	}
+	result /= fact( r );
+	return result;
+}
+
+//this function sets the probability of every tile
+function aiSetProbabilities() {
+	//count the number of unknown tiles
+	//unknown tiles being tiles we have no information about
+	var unknownCount = 0;
+	var cDiff = difficulties[ gameState.difficulty ];
+	for ( var i = 0; i < cDiff.width; i++ ) { //for each tile
+		for ( var j = 0; j < cDiff.height; j++ ) {
+			if ( grid[ ( ( j * cDiff.width ) + i ) ].currentState == 'hidden' ) {
+				var unknownTile = true;
+				grid[ ( ( j * cDiff.width ) + i ) ].unknown = false;
+				if ( i > 0 && grid[ ( ( j * cDiff.width ) + i - 1 ) ].currentState != 'hidden' ) unknownTile = false;
+				if ( i < cDiff.width - 1 && grid[ ( ( j * cDiff.width ) + i + 1 ) ].currentState != 'hidden' ) unknownTile = false;
+				if ( i > 0 && j > 0 && grid[ ( ( ( j - 1 ) * cDiff.width ) + i - 1 ) ].currentState != 'hidden' ) unknownTile = false;
+				if ( i < cDiff.width - 1 && j > 0 && grid[ ( ( ( j - 1 ) * cDiff.width ) + i + 1 ) ].currentState != 'hidden' ) unknownTile = false;
+				if ( i > 0 && j < cDiff.height - 1 && grid[ ( ( ( j + 1 ) * cDiff.width ) + i - 1 ) ].currentState != 'hidden' ) unknownTile = false;
+				if ( i < cDiff.width - 1 && j < cDiff.height - 1 && grid[ ( ( ( j + 1 ) * cDiff.width ) + i + 1 ) ].currentState != 'hidden' ) unknownTile = false;
+				if ( j < cDiff.height - 1 && grid[ ( ( ( j + 1 ) * cDiff.width ) + i ) ].currentState != 'hidden' ) unknownTile = false;
+				if ( j > 0 && grid[ ( ( ( j - 1 ) * cDiff.width ) + i ) ].currentState != 'hidden' ) unknownTile = false;
+				if ( unknownTile ) {
+					grid[ ( ( j * cDiff.width ) + i ) ].unknown = true;
+					unknownCount++;
+				}
+			}
+		}
+	}
+
+	//now we need to identify independent sections 
+	//the mine field can be broken up into seperate sections, if two tiles are in different sections then they have no effect on each other
+	//for example if you had a section of hidden tiles in the top left and a block of hidden tiles in the bottom right corner then they essentually have nothing to do with each other
+	sections = [];
+
+	for ( var i = 0; i < cDiff.width; i++ ) { //for each tile
+		for ( var j = 0; j < cDiff.height; j++ ) {
+			var idx = ( j * cDiff.width ) + i;
+			if ( grid[ idx ].currentState != 'hidden' && grid[ idx ].currentState != 'flagged' && grid[ idx ].hiddenNear - grid[ idx ].flaggedNear != 0 ) {
+				var alreadyInSection = false;
+				for ( var k = 0; k < sections.length; k++ ) { //for each section
+					if ( sections[ k ].includes( grid[ idx ] ) ) { //if the tile is already in this section then
+						alreadyInSection = true;
+						break;
+					}
+				}
+
+				if ( !alreadyInSection ) {
+					//if not in section then we have a new section so add it
+					newSection = [];
+					addConnected( newSection, i, j );
+					sections.push( newSection );
+				}
+			}
+		}
+	}
+
+	//so the sections should be defined
+	sectionSolutions = [];
+
+
+	//now we need to search for all possible positions that the bombs should be in
+	for ( var i = 0; i < sections.length; i++ ) {
+		sectionSolutions.push( getSolutions( sections[ i ] ) );
+	}
+
+	sectionSelections = [];
+
+	//this is an list of all possible bomb arrangements
+	allBombArrangements = [];
+
+	var finished = false;
+
+	//in order to populate the allBombArrangements list we need to combine the section solutions 
+	while ( !finished ) {
+		temp = [];
+		for ( var i = 0; i < sections.length; i++ ) {
+			// if(sectionSolutions[i][sectionSelections[i]] !== undefined){
+			var sum = sectionSolutions[ i ] + sectionSolutions[ sectionSelections[ i ] ];
+			for ( var j = 0; j < sum; j++ ) {
+				temp.push( sectionSolutions[ i ] );
+				temp.push( sectionSolutions[ sectionSelections[ i ] ] );
+				temp.push( sectionSolutions[ j ] );
+			} //}
+		}
+
+		if ( temp.length <= bombsLeft ) {
+			allBombArrangements.push( temp );
+		}
+
+		for ( var i = sections.length - 1; i >= 0; i-- ) {
+			sectionSelections[ i ] += 1;
+			if ( sectionSelections[ i ] >= sectionSolutions[ i ].length ) { //if the selection is out of bounds
+				if ( i == 0 ) {
+					finished = true;
+					break;
+				}
+				sectionSelections[ i ] = 0;
+			} else {
+				break;
+			}
+		}
+	}
+
+
+	//finally we have a list containing all the possible lists of bomb configurations
+	//now we just need to go through the arrangements and add the number of times each tile is a bomb
+
+	for ( var i = 0; i < cDiff.width; i++ ) {
+		for ( var j = 0; j < cDiff.height; j++ ) {
+			grid[ ( j * cDiff.width ) + i ].probabilityCount = 0;
+		}
+	}
+	totalArrangements = 0;
+	//since the remaining bombs can be arranged in any way amoungst the unknown tiles then the number of 
+	//arrangements for this element of allBombArrangements is nCr where n is the number
+	//of unknown spaces left and r is the number of bombs left
+	//this is where the numbers get very big 
+	for ( var i = 0; i < allBombArrangements.length; i++ ) {
+		var numberOfBombsLeft = bombsLeft - allBombArrangements[ i ].length; //get the number fo bombs left to be placed in unknown areas
+		combinations = numberOfCombinations( unknownCount, numberOfBombsLeft );
+
+		totalArrangements += combinations;
+
+		for ( var j = 0; j < allBombArrangements[ i ].length; j++ ) { //for each tile which is a bomb in this arrangement add the number of combinations that this arrangment has
+			allBombArrangements[ i ][ j ].probabilityCount += combinations;
+		}
+	}
+}
+
+function aiEarlyGuess( firstGuess ) {
+	//note in minesweeper the first guess is never a bomb so just keep guessing until I get not a bomb on the first guess
+	//count the number of corners left
+	var count = 0;
+	var cDiff = difficulties[ gameState.difficulty ];
+	// count += (grid[(0)].currentState == 'hidden' && !(grid[(0)].currentState == 'flagged') &&!(firstGuess && grid[(0)].hasMine)) ? 1:0;
+	// count += (grid[((cDiff.height-1 * cDiff.width))].currentState == 'hidden' && !(grid[((cDiff.height-1 * cDiff.width))].currentState == 'flagged') &&!(firstGuess && grid[(cDiff.height-1 * cDiff.width)].hasMine)) ? 1:0;
+	// count += (grid[((cDiff.width-1))].currentState == 'hidden' && !(grid[((cDiff.width-1))].currentState == 'flagged') &&!(firstGuess && grid[((cDiff.width-1))].hasMine)) ? 1:0;
+	// count += (grid[(((cDiff.height-1 * cDiff.width) + cDiff.width-1))].currentState == 'hidden' && !(grid[(((cDiff.height-1 * cDiff.width) + cDiff.width-1))].currentState == 'flagged') &&!(firstGuess && grid[(((cDiff.height-1 * cDiff.width) + cDiff.width-1))].hasMine)) ? 1:0;
+
 	// start by clicking corners
 	var cornerId = Math.floor( Math.random() * 4 );
 	if ( aiCornerCount < 4 ) {
@@ -502,16 +784,50 @@ function aiClickRandomTile() {
 			}
 			aiCorners[ cornerId ] = 1;
 			aiCornerCount++;
+			flagTarget = false;
 		}
 	} else {
 		do {
 			aiTargetX = Math.floor( Math.random() * cDiff.width );
 			aiTargetY = Math.floor( Math.random() * cDiff.height );
 		} while ( grid[ ( ( aiTargetY * cDiff.width ) + aiTargetX ) ].hasMine == true );
+		flagTarget = false;
 	}
-	grid[ ( ( aiTargetY * cDiff.width ) + aiTargetX ) ].click();
-	console.log( "aiClickRandomTile clicks" );
+}
 
+//method used by our AI solver to click on the corners of the Board if it finds no other better action to perform
+function aiClickRandomTile() {
+	var cDiff = difficulties[ gameState.difficulty ];
+	//if there are too many bombs left the number of arrangements get stupid high and it there are too many 
+	//then just guess randomly
+	if ( bombsLeft > cDiff.mines ) {
+		console.log( "aiClickRandomTile - Probability clicks" );
+		aiSetProbabilities();
+		var first = true;
+		min = 1000000000;
+		var minI = 0;
+		var minJ = 0;
+		//get the smallest probability 
+		for ( var i = 0; i < cDiff.width; i++ ) {
+			for ( var j = 0; j < cDiff.height; j++ ) {
+				var idx = ( j * cDiff.width ) + i;
+				if ( grid[ idx ].currentState != 'flagged' && grid[ idx ].currentState != 'hidden' && !grid[ idx ].unknown && ( first || grid[ idx ].probabilityCount <= min ) ) {
+					minI = i;
+					minJ = j;
+					min = grid[ idx ].probabilityCount;
+					first = false;
+				}
+			}
+		}
+
+		//target the smallest probability
+		aiTargetX = minI;
+		aiTargetY = minJ;
+		flagTarget = false;
+	} else { //if too many bombs then guess
+		console.log( "aiClickRandomTile - Early Guess clicks" );
+		aiEarlyGuess( false );
+	}
 }
 
 //method used by our AI solver to click on the neighboring hidden tiles if the value displayed on the tile (danger)
@@ -616,6 +932,7 @@ function aiFindTargetsUsingLinkedInfo() {
 
 //method called when User chooses the game to be played by the UI.
 function aiSolver() {
+	// aiEarlyGuess(true);
 	var cDiff = difficulties[ gameState.difficulty ];
 
 	// Make a move
@@ -666,7 +983,7 @@ function aiSolver() {
 // Use obtained information to determine whether any new targets are generated
 function findNewTarget() {
 	// Any tile having equal danger and hidden tiles -> All hidden tiles are mines
-	//aiSameDangerAndHiddenNear();
+	// aiSameDangerAndHiddenNear();
 	// Any tile having equal danger and flagged tiles -> All hidden tiles are safe
 	aiSameDangerAndFlaggedNear();
 	// If still no new targets revealed - check using linked configurations
