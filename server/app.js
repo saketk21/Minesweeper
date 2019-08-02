@@ -45,7 +45,7 @@ io.on( 'connection', socket => {
 		// Create Game object for the new game
 		let newGame = new Game();
 		let ai = new AI();
-		newGame.init(data.playerName, socket, data.difficulty);
+		newGame.init( data.playerName, socket, data.difficulty );
 		ai.init( newGame );
 		socketToGameMap.set( socket.id, newGame );
 		socketToAIMap.set( socket.id, ai );
@@ -128,7 +128,14 @@ io.on( 'connection', socket => {
 		} );
 	} )
 
-	socket.on( Constants.SOCKET_DISCONNECT, () => {} )
+	socket.on( Constants.SOCKET_DISCONNECT, data => {
+		if ( socketToGameMap.has( socket.id ) ) {
+			socketToGameMap.delete( socket.id );
+		}
+		if ( socketToAIMap.has( socket.id ) ) {
+			socketToGameMap.delete( socket.id );
+		}
+	} )
 } )
 
 // Starts the server.
