@@ -4,18 +4,20 @@ const FRAME_RATE = 1000 / 60
 // Dependencies
 const express = require( 'express' )
 const http = require( 'http' )
-const morgan = require( 'morgan' )
 const path = require( 'path' )
 const socketIO = require( 'socket.io' )
-const Constants = require( './../lib/Constants.js' )
-const Game = require( './src/Game.js' )
-const gameStates = require( './src/GameStates.js' )
-const AI = require( './src/AI.js' );
+const Constants = require( './lib/Constants.js' )
+const Game = require( './server/src/Game.js' )
+const gameStates = require( './server/src/GameStates.js' )
+const AI = require( './server/src/AI.js' );
 
 // Initialization
 const app = express()
 const server = http.Server( app )
-const io = socketIO( server )
+const io = socketIO( server, {
+	path: '/play'
+} )
+
 // const gameRoom = new GameRoom()
 let socketToGameMap = new Map()
 let socketToAIMap = new Map()
@@ -23,17 +25,20 @@ let socketToAIMap = new Map()
 
 app.set( 'port', PORT )
 
-app.use( morgan( 'dev' ) )
 app.use( '/client', express.static( path.join( __dirname, '/client' ) ) )
 app.use( '/dist', express.static( path.join( __dirname, '/dist' ) ) )
 
 // Routing
 app.get( '/', ( request, response ) => {
-	response.sendFile( path.join( __dirname, 'src/views/index.html' ) )
+	response.sendFile( path.join( __dirname, 'server/views/index.html' ) )
+} )
+
+app.get( '/play', ( request, response ) => {
+	response.sendFile( path.join( __dirname, 'server/views/game.html' ) )
 } )
 
 app.get( '/leaderboard', ( request, response ) => {
-	response.sendFile( path.join( __dirname, 'src/views/leaderboard.html' ) )
+	response.sendFile( path.join( __dirname, 'views/leaderboard.html' ) )
 } )
 
 /**
@@ -41,17 +46,29 @@ app.get( '/leaderboard', ( request, response ) => {
  * gameRoom based on the input it receives.
  */
 io.on( 'connection', socket => {
+	console.log( "Socket ", socket.id, " - connected " );
 	socket.on( Constants.SOCKET_NEW_GAME, data => {
 		// Create Game object for the new game
 		let newGame = new Game();
-		let ai = new AI();
+		// let ai = new AI();
 		newGame.init( data.playerName, socket, data.difficulty );
-		ai.init( newGame );
+		// ai.init( newGame );
 		socketToGameMap.set( socket.id, newGame );
-		socketToAIMap.set( socket.id, ai );
-
+		// socketToAIMap.set( socket.id, ai );
+		let gameState = newGame.getGameState();
+		let newBoardConfig = newGame.board.coords();
+		socket.emit( Constants.SOCKET_CURRENT_STATE, {
+			'newBoardConfig': newBoardConfig,
+			'gameState': gameState
+		} );
 	} )
 
+	socket.on( 'solution', () => {
+		let gameOfThisSocket = socketToGameMap.get( socket.id );
+		socket.emit( 'solutionRecd', {
+			solution: gameOfThisSocket.board.solution()
+		} );
+	} )
 	// socket.on( Constants.SOCKET_JOIN_GAME, data => {
 	// 	let gameRoomToJoin = gameRoomNameToGameRoomMap.get( data.gameRoomName );
 	// 	if ( gameRoomToJoin.passphrase === data.passphrase ) {
@@ -74,7 +91,8 @@ io.on( 'connection', socket => {
 
 	socket.on( Constants.SOCKET_CLICK_ACTION, data => {
 		let gameOfThisSocket = socketToGameMap.get( socket.id );
-		let newBoardConfig = gameOfThisSocket.handleClick( data.x, data.y );
+		console.log( data.row, data.col );
+		let newBoardConfig = gameOfThisSocket.handleClick( data.row, data.col );
 		let gameState = gameOfThisSocket.getGameState();
 		// Emit appropriate event based on gameState
 		if ( gameState === gameStates.WIN ) {
@@ -97,7 +115,7 @@ io.on( 'connection', socket => {
 
 	socket.on( Constants.SOCKET_FLAG_ACTION, data => {
 		let gameOfThisSocket = socketToGameMap.get( socket.id );
-		let newBoardConfig = gameOfThisSocket.handleFlag( data.x, data.y );
+		let newBoardConfig = gameOfThisSocket.handleFlag( data.row, data.col );
 		let gameState = gameOfThisSocket.getGameState();
 		socket.emit( Constants.SOCKET_CURRENT_STATE, {
 			'newBoardConfig': newBoardConfig,

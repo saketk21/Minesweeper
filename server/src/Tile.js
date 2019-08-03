@@ -1,10 +1,10 @@
 const tileTypes = require( './TileTypes.js' );
 
-let Tile = function ( x, y ) {
+let Tile = function ( row, col ) {
 	// Basic members for Tile State
 	// These member states are determined by actions on Tile, hence updates will occur via methods of Tile class
-	this.x = x;
-	this.y = y;
+	this.row = row;
+	this.col = col;
 	this.hidden = true;
 	this.isFlagged = false;
 	this.hasMine = false;

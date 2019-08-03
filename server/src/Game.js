@@ -1,6 +1,7 @@
 const difficulties = require( './Difficulties.js' );
 const gameStates = require( './GameStates.js' );
 const tileTypes = require( './TileTypes.js' );
+const Board = require( './Board.js' );
 
 let Game = function () {
 	this.board = null;
@@ -16,16 +17,16 @@ let Game = function () {
 		this.difficulty = difficulty;
 		// Create source board based on gameRoom parameters
 		let currentDifficulty = difficulties[ this.difficulty ];
-		this.board = new Board( currentDifficulty.width, currentDifficulty.height, currentDifficulty.mineCount );
+		this.board = new Board( currentDifficulty.rows, currentDifficulty.cols, currentDifficulty.mineCount );
 		this.gameState = gameStates.IN_PROGRESS;
 		this.board.initGrid();
 		this.startTime = Date.now();
 	};
 
 	this.hasWon = function () {
-		for ( var x = 0; x < this.board.width; x++ ) {
-			for ( var y = 0; y < this.board.height; y++ ) {
-				if ( this.board.grid[ x ][ y ].hidden && !this.board.grid[ x ][ y ].hasMine )
+		for ( var row = 0; row < this.board.rows; row++ ) {
+			for ( var col = 0; col < this.board.cols; col++ ) {
+				if ( this.board.grid[ row ][ col ].hidden && !this.board.grid[ row ][ col ].hasMine )
 					return;
 			}
 		}
@@ -33,71 +34,77 @@ let Game = function () {
 		this.timeTaken = Date.now() - startTime;
 	};
 
-	this.chord = function ( x, y, tileDanger ) {
+	this.chord = function ( row, col, tileDanger ) {
 		let flagsAroundTile = 0;
-		for ( var dx = x - 1; dx <= x + 1; dx++ ) {
-			for ( var dy = y - 1; dy <= y + 1; dy++ ) {
-				if ( dx == x && dy == y )
+		for ( var dr = row - 1; dr <= row + 1; dr++ ) {
+			for ( var dc = col - 1; dc <= col + 1; dc++ ) {
+				if ( dr == row && dc == col )
 					continue;
-				if ( dx < 0 || dx > this.width || dy < 0 || dy > this.height )
+				if ( dr < 0 || dr >= this.rows || dc < 0 || dc >= this.cols )
 					continue;
-				if ( this.board.grid[ dx ][ dy ].isFlagged )
+				if ( this.board.grid[ dr ][ dc ].isFlagged )
 					flagsAroundTile += 1;
 			}
 		}
 		if ( flagsAroundTile === tileDanger ) {
-			for ( var dx = x - 1; dx <= x + 1; dx++ ) {
-				for ( var dy = y - 1; dy <= y + 1; dy++ ) {
-					if ( dx == x && dy == y )
+			for ( var dr = row - 1; dr <= row + 1; dr++ ) {
+				for ( var dc = col - 1; dc <= col + 1; dc++ ) {
+					if ( dr == row && dc == col )
 						continue;
-					if ( dx < 0 || dx > this.width || dy < 0 || dy > this.height )
+					if ( dr < 0 || dr >= this.rows || dc < 0 || dc >= this.cols )
 						continue;
-					if ( this.board.grid[ dx ][ dy ].hidden )
-						this.handleClick( dx, dy );
+					if ( this.board.grid[ dr ][ dc ].hidden )
+						this.handleClick( dr, dc );
 				}
 			}
 		}
 	};
 
-	this.revealNeighbours = function ( x, y ) {
-		for ( var dx = x - 1; dx <= x + 1; dx++ ) {
-			for ( var dy = y - 1; dy <= y + 1; dy++ ) {
-				if ( dx == x && dy == y )
+	this.revealNeighbours = function ( row, col ) {
+		console.log( "Call with:", row, col, this.board.rows, this.board.cols );
+		for ( var dr = row - 1; dr <= row + 1; dr++ ) {
+			for ( var dc = col - 1; dc <= col + 1; dc++ ) {
+				if ( dr === row && dc === col )
 					continue;
-				if ( dx < 0 || dx > this.width || dy < 0 || dy > this.height )
+				if ( dr < 0 || dr >= this.board.rows || dc < 0 || dc >= this.board.cols )
 					continue;
-				if ( this.board.grid[ dx ][ dy ].hidden ) {
-					let clickStatus = this.revealTile( dx, dy );
+				console.log( "\tdr, dc: ", dr, dc, this.board.rows, this.board.cols );
+				if ( this.board.grid[ dr ][ dc ].hidden ) {
+					let clickStatus = this.board.grid[ dr ][ dc ].revealTile();
 					if ( clickStatus === 0 ) {
-						this.revealNeighbours( dx, dy );
+						this.revealNeighbours( dr, dc );
 					}
 				}
 			}
 		}
 	};
 
-	this.handleClick = function ( x, y ) {
-		// Will return grid's string representation after the click action
-		let clickStatus = this.board.grid[ x ][ y ].revealTile();
-		if ( clickStatus === tileTypes.MINE_CLICKED ) {
-			this.gameState = gameStates.LOSE;
-		} else if ( clickStatus === tileTypes.VISIBLE ) {
-			// Chording
-			this.chord( x, y, clickStatus );
-		} else if ( clickStatus == 0 ) {
-			this.revealNeighbours( x, y );
+	this.handleClick = function ( row, col ) {
+		if ( row >= 0 && col >= 0 && row < this.board.rows && col < this.board.cols ) {
+			// Will return grid's string representation after the click action
+			console.log( this.board.grid[ row ][ col ] );
+			let clickStatus = this.board.grid[ row ][ col ].revealTile();
+			console.log( clickStatus );
+			if ( clickStatus === tileTypes.MINE_CLICKED ) {
+				this.gameState = gameStates.LOSE;
+			} else if ( clickStatus === tileTypes.VISIBLE ) {
+				// Chording
+				this.chord( row, col, clickStatus );
+			} else if ( clickStatus === 0 ) {
+				this.revealNeighbours( row, col );
+			}
+			this.hasWon();
 		}
-		this.hasWon();
 		return this.board.toString();
 	};
 
-	this.handleFlag = function ( x, y ) {
-		this.board.grid[ x ][ y ].flagOrUnflagTile();
+	this.handleFlag = function ( row, col ) {
+		this.board.grid[ row ][ col ].flagOrUnflagTile();
 		return this.board.toString();
 	}
 
 	this.getGameState = function () {
-		return gameState;
+		return this.gameState;
 	}
 
 	this.updateStatistics = function () {

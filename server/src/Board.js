@@ -1,20 +1,20 @@
 const tileTypes = require( './TileTypes.js' );
 let Tile = require( './Tile.js' );
 
-let Board = function ( width, height, mineCount ) {
-	this.width = width;
-	this.height = height;
+let Board = function ( rows, cols, mineCount ) {
+	this.rows = rows;
+	this.cols = cols;
 	this.mineCount = mineCount;
 	this.grid = [];
 
 	this.initGrid = function () {
 		this.grid = new Array();
-		for ( let y = 0; y < this.height; y++ ) {
-			grid.push( new Array() );
+		for ( let row = 0; row < this.cols; row++ ) {
+			this.grid.push( new Array() );
 		}
-		for ( let y = 0; y < this.height; y++ ) {
-			for ( let x = 0; x < this.width; x++ ) {
-				grid[ y ].push( new Tile( x, y ) );
+		for ( let row = 0; row < this.rows; row++ ) {
+			for ( let col = 0; col < this.cols; col++ ) {
+				this.grid[ row ].push( new Tile( row, col ) );
 			}
 		}
 		this.placeMines();
@@ -26,24 +26,24 @@ let Board = function ( width, height, mineCount ) {
 			mineY = null;
 		for ( var remMines = mineCount; remMines > 0; remMines-- ) {
 			do {
-				mineX = Math.floor( Math.random() * this.width );
-				mineY = Math.floor( Math.random() * this.height );
-			} while ( grid[ mineX ][ mineY ].hasMine );
-			grid[ mineX ][ mineY ].placeMine();
+				mineX = Math.floor( Math.random() * this.rows );
+				mineY = Math.floor( Math.random() * this.cols );
+			} while ( this.grid[ mineX ][ mineY ].hasMine );
+			this.grid[ mineX ][ mineY ].placeMine();
 		}
 	};
 
 	this.calcDanger = function () {
-		for ( var x = 0; x < this.width; x++ ) {
-			for ( var y = 0; y < this.height; y++ ) {
-				for ( var dx = x - 1; dx <= x + 1; dx++ ) {
-					for ( var dy = y - 1; dy <= y + 1; dy++ ) {
-						if ( dx == x && dy == y )
+		for ( var row = 0; row < this.rows; row++ ) {
+			for ( var col = 0; col < this.cols; col++ ) {
+				for ( var dr = row - 1; dr <= row + 1; dr++ ) {
+					for ( var dc = col - 1; dc <= col + 1; dc++ ) {
+						if ( dr == row && dc == col )
 							continue;
-						if ( dx < 0 || dx > this.width || dy < 0 || dy > this.height )
+						if ( dr < 0 || dr >= this.rows || dc < 0 || dc >= this.cols )
 							continue;
-						if ( grid[ dx ][ dy ].hasMine )
-							grid[ x ][ y ].danger += 1;
+						if ( this.grid[ dr ][ dc ].hasMine )
+							this.grid[ row ][ col ].danger += 1;
 					}
 				}
 			}
@@ -52,16 +52,15 @@ let Board = function ( width, height, mineCount ) {
 
 	this.toString = function () {
 		let stringrepr = '';
-		for ( var y = 0; y < this.height; y++ ) {
-			for ( var x = 0; x < this.width; x++ ) {
-				let currentTile = this.grid[ x ][ y ];
+		for ( var row = 0; row < this.cols; row++ ) {
+			for ( var col = 0; col < this.rows; col++ ) {
+				let currentTile = this.grid[ row ][ col ];
 				if ( currentTile.hidden ) {
 					if ( currentTile.isFlagged )
 						stringrepr += 'F';
 					else
 						stringrepr += 'H';
-				}
-				if ( currentTile.danger >= 0 ) {
+				} else if ( currentTile.danger >= 0 ) {
 					stringrepr += '' + currentTile.danger;
 				}
 			}
@@ -69,6 +68,33 @@ let Board = function ( width, height, mineCount ) {
 		}
 		return stringrepr;
 	};
+
+	this.solution = function () {
+		let stringrepr = '';
+		for ( var row = 0; row < this.cols; row++ ) {
+			for ( var col = 0; col < this.rows; col++ ) {
+				let currentTile = this.grid[ row ][ col ];
+				if ( currentTile.hasMine )
+					stringrepr += 'X';
+				else
+					stringrepr += '' + currentTile.danger;
+			}
+			stringrepr += '/';
+		}
+		return stringrepr;
+	}
+
+	this.coords = function () {
+		let stringrepr = '';
+		for ( var row = 0; row < this.cols; row++ ) {
+			for ( var col = 0; col < this.rows; col++ ) {
+				let currentTile = this.grid[ row ][ col ];
+				stringrepr += "(" + currentTile.row + ", " + currentTile.col + ")";
+			}
+			stringrepr += '/';
+		}
+		return stringrepr;
+	}
 }
 
 module.exports = Board;
