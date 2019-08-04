@@ -36,25 +36,31 @@ let Game = function () {
 
 	this.chord = function ( row, col, tileDanger ) {
 		let flagsAroundTile = 0;
+		console.log( "Chroding:- ", row, col, tileDanger );
 		for ( var dr = row - 1; dr <= row + 1; dr++ ) {
 			for ( var dc = col - 1; dc <= col + 1; dc++ ) {
+				console.log( "DR, DC in chording:-", dr, dc );
 				if ( dr == row && dc == col )
 					continue;
-				if ( dr < 0 || dr >= this.rows || dc < 0 || dc >= this.cols )
+				if ( dr < 0 || dr >= this.board.rows || dc < 0 || dc >= this.board.cols )
 					continue;
 				if ( this.board.grid[ dr ][ dc ].isFlagged )
 					flagsAroundTile += 1;
 			}
 		}
+		console.log( "flags around (" + row + ", " + col + ") -- ", flagsAroundTile );
 		if ( flagsAroundTile === tileDanger ) {
+			console.log( "Trying all neighbours:- " )
 			for ( var dr = row - 1; dr <= row + 1; dr++ ) {
 				for ( var dc = col - 1; dc <= col + 1; dc++ ) {
 					if ( dr == row && dc == col )
 						continue;
-					if ( dr < 0 || dr >= this.rows || dc < 0 || dc >= this.cols )
+					if ( dr < 0 || dr >= this.board.rows || dc < 0 || dc >= this.board.cols )
 						continue;
-					if ( this.board.grid[ dr ][ dc ].hidden )
+					if ( this.board.grid[ dr ][ dc ].hidden ) {
+						console.log( "Hidden:- ", dr, dc );
 						this.handleClick( dr, dc );
+					}
 				}
 			}
 		}
@@ -89,7 +95,7 @@ let Game = function () {
 				this.gameState = gameStates.LOSE;
 			} else if ( clickStatus === tileTypes.VISIBLE ) {
 				// Chording
-				this.chord( row, col, clickStatus );
+				this.chord( row, col, this.board.grid[ row ][ col ].danger );
 			} else if ( clickStatus === 0 ) {
 				this.revealNeighbours( row, col );
 			}

@@ -52,8 +52,8 @@ let Board = function ( rows, cols, mineCount ) {
 
 	this.toString = function () {
 		let stringrepr = '';
-		for ( var row = 0; row < this.cols; row++ ) {
-			for ( var col = 0; col < this.rows; col++ ) {
+		for ( var row = 0; row < this.rows; row++ ) {
+			for ( var col = 0; col < this.cols; col++ ) {
 				let currentTile = this.grid[ row ][ col ];
 				if ( currentTile.hidden ) {
 					if ( currentTile.isFlagged )
@@ -71,8 +71,8 @@ let Board = function ( rows, cols, mineCount ) {
 
 	this.solution = function () {
 		let stringrepr = '';
-		for ( var row = 0; row < this.cols; row++ ) {
-			for ( var col = 0; col < this.rows; col++ ) {
+		for ( var row = 0; row < this.rows; row++ ) {
+			for ( var col = 0; col < this.cols; col++ ) {
 				let currentTile = this.grid[ row ][ col ];
 				if ( currentTile.hasMine )
 					stringrepr += 'X';
@@ -86,8 +86,8 @@ let Board = function ( rows, cols, mineCount ) {
 
 	this.coords = function () {
 		let stringrepr = '';
-		for ( var row = 0; row < this.cols; row++ ) {
-			for ( var col = 0; col < this.rows; col++ ) {
+		for ( var row = 0; row < this.rows; row++ ) {
+			for ( var col = 0; col < this.cols; col++ ) {
 				let currentTile = this.grid[ row ][ col ];
 				stringrepr += "(" + currentTile.row + ", " + currentTile.col + ")";
 			}

@@ -31,8 +31,10 @@ let Tile = function ( row, col ) {
 			if ( this.hasMine )
 				returnValue = tileTypes.MINE_CLICKED;
 			// Tile is hidden, not flagged and doesn't have mine, so return danger value
-			this.hidden = false;
-			returnValue = this.danger;
+			else {
+				this.hidden = false;
+				returnValue = this.danger;
+			}
 		} else if ( !this.hidden ) {
 			// Clicked on visible tile, return VISIBLE enum value for chording
 			returnValue = tileTypes.VISIBLE;

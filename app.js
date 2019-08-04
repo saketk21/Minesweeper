@@ -48,6 +48,7 @@ app.get( '/leaderboard', ( request, response ) => {
 io.on( 'connection', socket => {
 	console.log( "Socket ", socket.id, " - connected " );
 	socket.on( Constants.SOCKET_NEW_GAME, data => {
+		console.log( "New Game Requested" );
 		// Create Game object for the new game
 		let newGame = new Game();
 		// let ai = new AI();
@@ -91,36 +92,42 @@ io.on( 'connection', socket => {
 
 	socket.on( Constants.SOCKET_CLICK_ACTION, data => {
 		let gameOfThisSocket = socketToGameMap.get( socket.id );
-		console.log( data.row, data.col );
-		let newBoardConfig = gameOfThisSocket.handleClick( data.row, data.col );
-		let gameState = gameOfThisSocket.getGameState();
-		// Emit appropriate event based on gameState
-		if ( gameState === gameStates.WIN ) {
-			socket.emit( Constants.SOCKET_WIN_STATE, {
-				'newBoardConfig': newBoardConfig,
-				'gameState': gameState,
-			} );
-			gameOfThisSocket.updateStatistics();
-		} else if ( gameState === gameStates.LOSE ) {
-			socket.emit( Constants.SOCKET_LOSE_STATE, {
-				'newBoardConfig': newBoardConfig,
-				'gameState': gameState,
-			} );
+
+		if ( gameOfThisSocket ) {
+			let newBoardConfig = gameOfThisSocket.handleClick( data.row, data.col );
+			let gameState = gameOfThisSocket.getGameState();
+			// Emit appropriate event based on gameState
+			if ( gameState === gameStates.WIN ) {
+				socket.emit( Constants.SOCKET_WIN_STATE, {
+					'newBoardConfig': newBoardConfig,
+					'gameState': gameState,
+				} );
+				gameOfThisSocket.updateStatistics();
+			} else if ( gameState === gameStates.LOSE ) {
+				socket.emit( Constants.SOCKET_LOSE_STATE, {
+					'newBoardConfig': newBoardConfig,
+					'gameState': gameState,
+				} );
+			} else {
+				socket.emit( Constants.SOCKET_CURRENT_STATE, {
+					'newBoardConfig': newBoardConfig,
+					'gameState': gameState
+				} );
+			}
 		}
-		socket.emit( Constants.SOCKET_CURRENT_STATE, {
-			'newBoardConfig': newBoardConfig,
-			'gameState': gameState
-		} );
 	} )
 
 	socket.on( Constants.SOCKET_FLAG_ACTION, data => {
 		let gameOfThisSocket = socketToGameMap.get( socket.id );
-		let newBoardConfig = gameOfThisSocket.handleFlag( data.row, data.col );
-		let gameState = gameOfThisSocket.getGameState();
-		socket.emit( Constants.SOCKET_CURRENT_STATE, {
-			'newBoardConfig': newBoardConfig,
-			'gameState': gameState
-		} );
+		if ( gameOfThisSocket ) {
+			let newBoardConfig = gameOfThisSocket.handleFlag( data.row, data.col );
+			let gameState = gameOfThisSocket.getGameState();
+			socket.emit( Constants.SOCKET_CURRENT_STATE, {
+				'newBoardConfig': newBoardConfig,
+				'gameState': gameState
+			} );
+		}
+
 	} )
 
 	socket.on( Constants.SOCKET_AI_ACTION, data => {
@@ -146,7 +153,8 @@ io.on( 'connection', socket => {
 		} );
 	} )
 
-	socket.on( Constants.SOCKET_DISCONNECT, data => {
+	socket.on( Constants.SOCKET_DISCONNECT, () => {
+		console.log( "Socket Disconnected:-", socket.id );
 		if ( socketToGameMap.has( socket.id ) ) {
 			socketToGameMap.delete( socket.id );
 		}

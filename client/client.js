@@ -5,11 +5,23 @@ let socket = io.connect( "localhost:5000", {
 	path: '/play'
 } );
 
-$( "#beginner" ).click( function () {
+function startGame( difficulty ) {
 	socket.emit( Constants.SOCKET_NEW_GAME, {
 		playerName: 'saketk21',
-		difficulty: 'beginner'
+		difficulty: difficulty
 	} )
+}
+
+$( "#beginner" ).click( function () {
+	startGame( 'beginner' );
+} );
+
+$( "#intermediate" ).click( function () {
+	startGame( 'intermediate' );
+} );
+
+$( "#expert" ).click( function () {
+	startGame( 'expert' );
 } );
 
 function startClick( row, col ) {
@@ -20,6 +32,14 @@ function startClick( row, col ) {
 }
 
 document.startClick = startClick;
+
+document.startFlag = ( row, col ) => {
+	socket.emit( Constants.SOCKET_FLAG_ACTION, {
+		row: row,
+		col: col
+	} )
+};
+
 document.getSolution = () => {
 	socket.emit( 'solution', {} );
 };

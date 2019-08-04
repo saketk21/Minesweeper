@@ -10,8 +10,8 @@ module.exports = {
 		mineCount: 40
 	},
 	"expert": {
-		rows: 30,
-		cols: 16,
+		rows: 16,
+		cols: 30,
 		mineCount: 99
 	}
 };
