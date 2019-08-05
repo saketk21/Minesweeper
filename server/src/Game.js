@@ -31,7 +31,7 @@ let Game = function () {
 			}
 		}
 		this.gameState = gameStates.WIN;
-		this.timeTaken = Date.now() - startTime;
+		this.timeTaken = Date.now() - this.startTime;
 	};
 
 	this.chord = function ( row, col, tileDanger ) {
