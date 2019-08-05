@@ -40,6 +40,10 @@ document.startFlag = ( row, col ) => {
 	} )
 };
 
+document.aiHint = () => {
+	socket.emit( Constants.SOCKET_AI_ACTION, {} )
+};
+
 document.getSolution = () => {
 	socket.emit( 'solution', {} );
 };

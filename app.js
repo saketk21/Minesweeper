@@ -51,11 +51,11 @@ io.on( 'connection', socket => {
 		console.log( "New Game Requested. SocketToGameMap length:-", socketToGameMap.size );
 		// Create Game object for the new game
 		let newGame = new Game();
-		// let ai = new AI();
+		let ai = new AI();
 		newGame.init( data.playerName, socket, data.difficulty );
-		// ai.init( newGame );
+		ai.init( newGame );
 		socketToGameMap.set( socket.id, newGame );
-		// socketToAIMap.set( socket.id, ai );
+		socketToAIMap.set( socket.id, ai );
 		let gameState = newGame.getGameState();
 		let newBoardConfig = newGame.board.toString( gameState );
 		socket.emit( Constants.SOCKET_CURRENT_STATE, {
@@ -131,6 +131,7 @@ io.on( 'connection', socket => {
 	} )
 
 	socket.on( Constants.SOCKET_AI_ACTION, data => {
+		let gameOfThisSocket = socketToGameMap.get( socket.id );
 		let aiOfThisSocket = socketToAIMap.get( socket.id );
 		let newBoardConfig = aiOfThisSocket.aiSolve();
 		let gameState = gameOfThisSocket.getGameState();
@@ -146,11 +147,12 @@ io.on( 'connection', socket => {
 				'newBoardConfig': newBoardConfig,
 				'gameState': gameState,
 			} );
+		} else {
+			socket.emit( Constants.SOCKET_CURRENT_STATE, {
+				'newBoardConfig': newBoardConfig,
+				'gameState': gameState
+			} );
 		}
-		socket.emit( Constants.SOCKET_CURRENT_STATE, {
-			'newBoardConfig': newBoardConfig,
-			'gameState': gameState
-		} );
 	} )
 
 	socket.on( Constants.SOCKET_DISCONNECT, () => {

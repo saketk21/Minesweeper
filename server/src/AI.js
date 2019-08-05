@@ -12,6 +12,9 @@ let AI = function () {
     this.targetsList = []; //has a list of tiles on which the AI will perform either click or flag action
     this.aiCornerCount = 0;
     this.aiCorners = [ 0, 0, 0, 0 ];
+    this.row = null;
+    this.col = null;
+    this.needToFlag = null;
 
     this.init = function ( game ) { //init called when new AI object is created
         this.game = game;
@@ -20,7 +23,7 @@ let AI = function () {
 
     this.aiSolve = function () {
         let newBoardConfig = null;
-        if ( !flagTarget ) { // Make a move
+        if ( !this.flagTarget ) { // Make a move
             if ( this.game.board.grid[ this.aiTargetRow ][ this.aiTargetCol ].isFlagged == true ) {
                 console.log( "Incorrect click attempt." );
             } else {
@@ -48,7 +51,7 @@ let AI = function () {
         if ( this.targetsList.length !== 0 ) {
             this.aiTargetRow = this.targetsList[ 0 ].row;
             this.aiTargetCol = this.targetsList[ 0 ].col;
-            if ( targetsList[ 0 ].needToFlag ) {
+            if ( this.targetsList[ 0 ].needToFlag ) {
                 this.flagTarget = true;
                 console.log( "targetList flags" );
             } else {
@@ -135,7 +138,7 @@ let AI = function () {
     // Use obtained information to determine whether any new targets are generated
     this.findNewTarget = function () {
         // Any tile having equal danger and hidden tiles -> All hidden tiles are mines
-        this.aiSameDangerAndHiddenNear(); //DOUBT - Check if need to comment this
+        //this.aiSameDangerAndHiddenNear(); //DOUBT - Check if need to comment this
         // Any tile having equal danger and flagged tiles -> All hidden tiles are safe
         this.aiSameDangerAndFlaggedNear();
         // If still no new targets revealed - check using linked configurations
@@ -161,7 +164,11 @@ let AI = function () {
                                 continue;
                             }
                             if ( this.game.board.grid[ dr ][ dc ].hidden == true && !this.game.board.grid[ dr ][ dc ].alreadyTargeted ) {
-                                this.targetsList.push( new Target( dr, dc, true ) );
+                                var target = {};
+                                target["row"] = dr;
+                                target["col"] = dc;
+                                target["needToFlag"] = true;
+                                this.targetsList.push( target );
                                 console.log( "aiSameDangerAndHiddenNear flags" );
                                 this.game.board.grid[ dr ][ dc ].alreadyTargeted = true;
                             }
@@ -187,7 +194,11 @@ let AI = function () {
                                 continue;
                             }
                             if ( this.game.board.grid[ dr ][ dc ].hidden == true && !this.game.board.grid[ dr ][ dc ].alreadyTargeted ) {
-                                this.targetsList.push( new Target( dr, dc, false ) );
+                                var target = {};
+                                target["row"] = dr;
+                                target["col"] = dc;
+                                target["needToFlag"] = false;
+                                this.targetsList.push( target );
                                 console.log( "aiSameDangerAndFlaggedNear clicks" );
                                 this.game.board.grid[ dr ][ dc ].alreadyTargeted = true;
                             }
@@ -222,7 +233,11 @@ let AI = function () {
                                         for ( var m = 0; m < this.game.board.grid[ row ][ col ].allHiddenNeighbours.length; m++ ) {
                                             if ( !linkedTilesAdjacentToThis.includes( this.game.board.grid[ row ][ col ].allHiddenNeighbours[ m ] ) ) {
                                                 temp = this.game.board.grid[ row ][ col ].allHiddenNeighbours[ m ];
-                                                this.targetsList.push( new Target( temp.row, temp.col, true ) );
+                                                var target = {};
+                                                target["row"] = temp.row;
+                                                target["col"] = temp.col;
+                                                target["needToFlag"] = true;                
+                                                this.targetsList.push( target  );
                                                 console.log( "aiFindTargetsUsingLinkedInfo clicks" );
                                                 temp.alreadyTargeted = true;
                                             }
@@ -278,7 +293,7 @@ let AI = function () {
     };
 
     //stores the x-y coordinates and the action to be performed on it
-    this.Target( row, col, needToFlag ) = function () { //DOUBT - is this correct?
+    this.Target = function ( row, col, needToFlag ) { //DOUBT - is this correct?
         this.row = row;
         this.col = col;
         this.needToFlag = needToFlag;
