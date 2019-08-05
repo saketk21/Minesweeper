@@ -235,10 +235,6 @@ let AI = function () {
                                                 target[ "col" ] = temp.col;
                                                 target[ "needToFlag" ] = true;
                                                 this.targetsList.push( target );
-<<<<<<< HEAD
-=======
-                                                console.log( "aiFindTargetsUsingLinkedInfo clicks" );
->>>>>>> 95d7a748e3fd64c1dcf6c6ebfe6306ae25dd44a9
                                                 temp.alreadyTargeted = true;
                                                 console.log( "aiFindTargetsUsingLinkedInfo adds ", temp.row, temp.col, " in targetList to Flag" );
                                             }
