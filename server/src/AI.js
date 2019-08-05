@@ -1,5 +1,5 @@
-const difficulties = require( './Difficulties.js' );
-const gameStates = require( './GameStates.js' );
+const difficulties = require( '../../lib/Difficulties.js' );
+const gameStates = require( '../../lib/GameStates.js' );
 const tileTypes = require( './TileTypes.js' );
 let Tile = require( './Tile.js' );
 
@@ -235,6 +235,10 @@ let AI = function () {
                                                 target[ "col" ] = temp.col;
                                                 target[ "needToFlag" ] = true;
                                                 this.targetsList.push( target );
+<<<<<<< HEAD
+=======
+                                                console.log( "aiFindTargetsUsingLinkedInfo clicks" );
+>>>>>>> 95d7a748e3fd64c1dcf6c6ebfe6306ae25dd44a9
                                                 temp.alreadyTargeted = true;
                                                 console.log( "aiFindTargetsUsingLinkedInfo adds ", temp.row, temp.col, " in targetList to Flag" );
                                             }

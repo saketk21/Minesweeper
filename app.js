@@ -8,7 +8,7 @@ const path = require( 'path' )
 const socketIO = require( 'socket.io' )
 const Constants = require( './lib/Constants.js' )
 const Game = require( './server/src/Game.js' )
-const gameStates = require( './server/src/GameStates.js' )
+const gameStates = require( './lib/GameStates.js' )
 const AI = require( './server/src/AI.js' );
 
 // Initialization
@@ -67,7 +67,8 @@ io.on( 'connection', socket => {
 	socket.on( 'solution', () => {
 		let gameOfThisSocket = socketToGameMap.get( socket.id );
 		socket.emit( 'solutionRecd', {
-			solution: gameOfThisSocket.board.solution()
+			solution: gameOfThisSocket.board.solution(),
+			value3BV: gameOfThisSocket.board.get3BV()
 		} );
 	} )
 	// socket.on( Constants.SOCKET_JOIN_GAME, data => {
