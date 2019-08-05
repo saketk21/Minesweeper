@@ -1,3 +1,4 @@
+const gameStates = require( './GameStates.js' );
 const tileTypes = require( './TileTypes.js' );
 let Tile = require( './Tile.js' );
 
@@ -50,18 +51,37 @@ let Board = function ( rows, cols, mineCount ) {
 		}
 	};
 
-	this.toString = function () {
+	this.toString = function ( gameState ) {
 		let stringrepr = '';
 		for ( var row = 0; row < this.rows; row++ ) {
 			for ( var col = 0; col < this.cols; col++ ) {
 				let currentTile = this.grid[ row ][ col ];
-				if ( currentTile.hidden ) {
-					if ( currentTile.isFlagged )
+				if ( gameState === gameStates.WIN ) {
+					if ( currentTile.hasMine )
 						stringrepr += 'F';
 					else
+						stringrepr += currentTile.danger;
+				} else if ( gameState === gameStates.LOSE ) {
+					if ( currentTile.isFlagged ) {
+						if ( currentTile.hasMine )
+							stringrepr += 'F';
+						else
+							stringrepr += 'I';
+					} else if ( currentTile.hasMine )
+						stringrepr += 'X';
+					else if ( currentTile.hidden )
 						stringrepr += 'H';
-				} else if ( currentTile.danger >= 0 ) {
-					stringrepr += '' + currentTile.danger;
+					else
+						stringrepr += currentTile.danger;
+				} else {
+					if ( currentTile.hidden ) {
+						if ( currentTile.isFlagged )
+							stringrepr += 'F';
+						else
+							stringrepr += 'H';
+					} else if ( currentTile.danger >= 0 ) {
+						stringrepr += '' + currentTile.danger;
+					}
 				}
 			}
 			stringrepr += '/';

@@ -101,12 +101,12 @@ let Game = function () {
 			}
 			this.hasWon();
 		}
-		return this.board.toString();
+		return this.board.toString( this.gameState );
 	};
 
 	this.handleFlag = function ( row, col ) {
 		this.board.grid[ row ][ col ].flagOrUnflagTile();
-		return this.board.toString();
+		return this.board.toString( this.gameState );
 	}
 
 	this.getGameState = function () {
