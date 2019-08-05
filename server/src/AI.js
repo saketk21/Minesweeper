@@ -12,7 +12,7 @@ let AI = function () {
     this.targetsList = []; //has a list of tiles on which the AI will perform either click or flag action
     this.aiCornerCount = 0;
     this.aiCorners = [ 0, 0, 0, 0 ];
-    
+
     this.init = function ( game ) { //init called when new AI object is created
         this.game = game;
 
@@ -50,10 +50,10 @@ let AI = function () {
             this.aiTargetCol = this.targetsList[ 0 ].col;
             if ( this.targetsList[ 0 ].needToFlag ) {
                 this.flagTarget = true;
-                console.log( "targetList flags" );
+                console.log( "targetList flags", this.aiTargetRow, this.aiTargetCol );
             } else {
                 this.flagTarget = false;
-                console.log( "targetList clicks" );
+                console.log( "targetList clicks", this.aiTargetRow, this.aiTargetCol );
             }
             this.targetsList.shift();
 
@@ -162,11 +162,10 @@ let AI = function () {
                             }
                             if ( this.game.board.grid[ dr ][ dc ].hidden == true && !this.game.board.grid[ dr ][ dc ].alreadyTargeted ) {
                                 var target = {};
-                                target["row"] = dr;
-                                target["col"] = dc;
-                                target["needToFlag"] = true;
+                                target[ "row" ] = dr;
+                                target[ "col" ] = dc;
+                                target[ "needToFlag" ] = true;
                                 this.targetsList.push( target );
-                                console.log( "aiSameDangerAndHiddenNear flags" );
                                 this.game.board.grid[ dr ][ dc ].alreadyTargeted = true;
                             }
                         }
@@ -174,6 +173,7 @@ let AI = function () {
                 }
             }
         }
+        console.log( "aiSameDangerAndHiddenNear flags" );
     };
 
     //method used by our AI solver to click on the neighboring hidden tiles if the value displayed on the tile (danger)
@@ -181,7 +181,7 @@ let AI = function () {
     this.aiSameDangerAndFlaggedNear = function () {
         for ( var row = 0; row < this.game.board.rows; row++ ) {
             for ( var col = 0; col < this.game.board.cols; col++ ) {
-                if ( this.game.board.grid[ row ][ col ].danger == this.game.board.grid[ row ][ col ].flaggedNear ) {
+                if ( this.game.board.grid[ row ][ col ].danger == this.game.board.grid[ row ][ col ].flaggedNear && this.game.board.grid[ row ][ col ].flaggedNear != 0 ) {
                     for ( var dc = col - 1; dc <= col + 1; dc++ ) {
                         for ( var dr = row - 1; dr <= row + 1; dr++ ) {
                             if ( dr == row && dc == col ) {
@@ -192,12 +192,12 @@ let AI = function () {
                             }
                             if ( this.game.board.grid[ dr ][ dc ].hidden == true && !this.game.board.grid[ dr ][ dc ].alreadyTargeted ) {
                                 var target = {};
-                                target["row"] = dr;
-                                target["col"] = dc;
-                                target["needToFlag"] = false;
+                                target[ "row" ] = dr;
+                                target[ "col" ] = dc;
+                                target[ "needToFlag" ] = false;
                                 this.targetsList.push( target );
-                                console.log( "aiSameDangerAndFlaggedNear clicks" );
                                 this.game.board.grid[ dr ][ dc ].alreadyTargeted = true;
+                                console.log( "aiSameDangerAndFlaggedNear adds ", dr, dc, " in the targetList" );
                             }
                         }
                     }
@@ -231,12 +231,12 @@ let AI = function () {
                                             if ( !linkedTilesAdjacentToThis.includes( this.game.board.grid[ row ][ col ].allHiddenNeighbours[ m ] ) ) {
                                                 temp = this.game.board.grid[ row ][ col ].allHiddenNeighbours[ m ];
                                                 var target = {};
-                                                target["row"] = temp.row;
-                                                target["col"] = temp.col;
-                                                target["needToFlag"] = true;                
-                                                this.targetsList.push( target  );
-                                                console.log( "aiFindTargetsUsingLinkedInfo clicks" );
+                                                target[ "row" ] = temp.row;
+                                                target[ "col" ] = temp.col;
+                                                target[ "needToFlag" ] = true;
+                                                this.targetsList.push( target );
                                                 temp.alreadyTargeted = true;
+                                                console.log( "aiFindTargetsUsingLinkedInfo adds ", temp.row, temp.col, " in targetList to Flag" );
                                             }
                                         }
                                     }
@@ -254,39 +254,43 @@ let AI = function () {
     this.aiClickRandomTile = function () {
         //add code for probability
         // start by clicking corners
-        var cornerId = Math.floor( Math.random() * 4 );
         if ( this.aiCornerCount < 4 ) {
-            if ( this.aiCorners[ cornerId ] == 0 ) {
-                switch ( cornerId ) {
-                    case 0:
-                        this.aiTargetRow = 0;
-                        this.aiTargetCol = 0;
-                        break;
-                    case 1:
-                        this.aiTargetRow = 0;
-                        this.aiTargetCol = this.game.board.cols - 1;
-                        break;
-                    case 2:
-                        this.aiTargetRow = this.game.board.rows - 1;
-                        this.aiTargetCol = 0;
-                        break;
-                    case 3:
-                        this.aiTargetRow = this.game.board.rows - 1;
-                        this.aiTargetCol = this.game.board.cols - 1;
-                        break;
+            while ( true ) {
+                var cornerId = Math.floor( Math.random() * 4 );
+                if ( this.aiCorners[ cornerId ] == 0 ) {
+                    switch ( cornerId ) {
+                        case 0:
+                            this.aiTargetRow = 0;
+                            this.aiTargetCol = 0;
+                            break;
+                        case 1:
+                            this.aiTargetRow = 0;
+                            this.aiTargetCol = this.game.board.cols - 1;
+                            break;
+                        case 2:
+                            this.aiTargetRow = this.game.board.rows - 1;
+                            this.aiTargetCol = 0;
+                            break;
+                        case 3:
+                            this.aiTargetRow = this.game.board.rows - 1;
+                            this.aiTargetCol = this.game.board.cols - 1;
+                            break;
+                    }
+                    this.aiCorners[ cornerId ] = 1;
+                    this.aiCornerCount++;
+                    this.flagTarget = false;
+                    break;
                 }
-                this.aiCorners[ cornerId ] = 1;
-                this.aiCornerCount++;
-                this.flagTarget = false;
             }
         } else {
             do {
-                aiTargetRow = Math.floor( Math.random() * this.game.board.rows );
-                aiTargetCol = Math.floor( Math.random() * this.game.board.cols );
-            } while ( this.game.board.grid[ aiTargetRow ][ aiTargetCol ].hidden == false ||
-                this.game.board.grid[ aiTargetRow ][ aiTargetCol ].isFlagged == true || this.game.board.grid[ aiTargetRow ][ aiTargetCol ].hasMine == true );
+                this.aiTargetRow = Math.floor( Math.random() * this.game.board.rows );
+                this.aiTargetCol = Math.floor( Math.random() * this.game.board.cols );
+            } while ( this.game.board.grid[ this.aiTargetRow ][ this.aiTargetCol ].hidden == false ||
+                this.game.board.grid[ this.aiTargetRow ][ this.aiTargetCol ].isFlagged == true || this.game.board.grid[ this.aiTargetRow ][ this.aiTargetCol ].hasMine == true );
             this.flagTarget = false;
         }
+        console.log( "aiClickRandomTile adds ", this.aiTargetRow, this.aiTargetCol, "in the targetList for flagTarget: ", this.flagTarget );
     };
 
     //stores the x-y coordinates and the action to be performed on it
