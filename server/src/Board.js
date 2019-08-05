@@ -24,83 +24,80 @@ let Board = function ( rows, cols, mineCount ) {
 		this.calc3BV();
 	};
 
-	this.calc3BV = function(){
+	this.calc3BV = function () {
 		let visited = [];
 		let affected = [];
 		let depressedAreas = 0;
-		let clonedGrid = (function{
-			let array = [];
-			for(let x = 0; x < rows; x++){
-				for(let y = 0; y < columns; y++){
-					if(this.grid[x][y].hasMine == true)
-						array.push(-1);
-					else if(this.grid[x][y].danger == 0)
-						array.push(0);
-					else
-						array.push(1);
-					
-					visited.push(false);
-					affected.push(false);
-				}
-			}
-			return array;
-		}());
+		let clonedGrid = [];
+		for ( let r = 0; r < this.rows; r++ ) {
+			for ( let c = 0; c < this.cols; c++ ) {
+				if ( this.grid[ r ][ c ].hasMine )
+					clonedGrid.push( -1 );
+				else if ( this.grid[ r ][ c ].danger === 0 )
+					clonedGrid.push( 0 );
+				else
+					clonedGrid.push( 1 );
 
-		for(let index = 0; index < clonedGrid.length; index++){
-			if(clonedGrid[index] === 0){
-					calcValue(index);
-					depressedAreas++;
+				visited.push( false );
+				affected.push( false );
 			}
 		}
+		console.log( clonedGrid );
 
-		let calcValue = (function (idx) {
-			if(clonedGrid[idx] === -1)
+		let updateAffectedDepressedRegion = function ( idx ) {
+			if ( clonedGrid[ idx ] === -1 )
 				return;
-		
-			if((clonedGrid[idx] === 0 && visited[idx] == false) || (affected[idx] === true)) {
-		
-				if(clonedGrid[idx] === 0)
-					affected[idx] = false;
-		
-				if(affected[idx] === true){
-					clonedGrid[idx] = -1;
-					visited[idx] = true;
+
+			if ( ( clonedGrid[ idx ] === 0 && !visited[ idx ] ) || ( affected[ idx ] ) ) {
+
+				if ( clonedGrid[ idx ] === 0 )
+					affected[ idx ] = false;
+
+				if ( affected[ idx ] ) {
+					clonedGrid[ idx ] = -1;
+					visited[ idx ] = true;
 					return;
 				}
-				
-				for (var py = this.rows - 1; py <= this.rows + 1; py++) {
-					for (var px = this.columns - 1; px <= this.columns + 1; px++) {
-						if (px == (idx - (idx / this.rows)) && py == (idx / this.columns)) { continue; }
-		
-						if (px < 0 || py < 0 ||
-							px >= this.columns ||
-							py >= this.rows) {
+				let rowForIdx = Math.floor( idx / this.cols ),
+					colForIdx = idx % this.cols;
+
+				for ( var dr = rowForIdx - 1; dr <= rowForIdx + 1; dr++ ) {
+					for ( var dc = colForIdx - 1; dc <= colForIdx + 1; dc++ ) {
+						if ( dc === colForIdx && dr === rowForIdx ) {
 							continue;
 						}
-						clonedGrid[idx] = -1;
-						visited[idx] = true;
-						var index = py * this.columns + px;
-		
-						affected[index] = true;
-						calcValue(index);
-		
+
+						if ( dc < 0 || dr < 0 || dc >= this.cols || dr >= this.rows ) {
+							continue;
+						}
+						clonedGrid[ idx ] = -1;
+						visited[ idx ] = true;
+						var index = dr * this.cols + dc;
+
+						affected[ index ] = true;
+						updateAffectedDepressedRegion( index );
 					}
-		
 				}
-		
 			}
-		}());
+		};
 
+		for ( let index = 0; index < clonedGrid.length; index++ ) {
+			if ( clonedGrid[ index ] === 0 ) {
+				updateAffectedDepressedRegion( index );
+				depressedAreas++;
+			}
+		}
+		console.log( depressedAreas );
 		let numberCount = 0;
-		for(var ind = 0; ind < clonedGrid.length; ind++)
-	 	if(clonedGrid[ind] === 1)
-					numberCount++;
+		for ( var ind = 0; ind < clonedGrid.length; ind++ )
+			if ( clonedGrid[ ind ] === 1 )
+				numberCount++;
 
-		this.value3BV = this.depressedAreas + this.numberCount;
-
+		this.value3BV = depressedAreas + numberCount;
+		console.log( this.value3BV );
 	};
 
-	this.get3BV = function(){
+	this.get3BV = function () {
 		return this.value3BV;
 	};
 

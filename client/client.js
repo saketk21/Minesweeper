@@ -48,7 +48,7 @@ document.getSolution = () => {
 	socket.emit( 'solution', {} );
 };
 socket.on( 'solutionRecd', data => {
-	console.log( "Solution\n" + parse( data.solution ) );
+	console.log( "Solution\n" + parse( data.solution ) + "\n3BV:-", data.value3BV );
 } )
 socket.on( 'connect', () => {
 	console.log( "Connected as ", socket.id );
