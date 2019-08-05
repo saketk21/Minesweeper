@@ -65,19 +65,19 @@ let AI = function () {
 
     //Recomputes various attributes for each tile in the grid after each click or flag
     this.computeTileInfo = function () {
-        for ( var x = 0; x < this.game.board.width; x++ ) {
-            for ( var y = 0; y < this.game.board.height; y++ ) {
-                this.game.board.grid[ x ][ y ].hiddenNear = 0;
-                this.game.board.grid[ x ][ y ].flaggedNear = 0;
-                this.game.board.grid[ x ][ y ].allHiddenNeighbours = [];
+        for ( var row = 0; row < this.game.board.rows; row++ ) {
+            for ( var col = 0; col < this.game.board.cols; col++ ) {
+                this.game.board.grid[ row ][ col ].hiddenNear = 0;
+                this.game.board.grid[ row ][ col ].flaggedNear = 0;
+                this.game.board.grid[ row ][ col ].allHiddenNeighbours = [];
                 //if a neighboring tile was flagged or hidden, it will increase the respective counter for that tile and also add that hidden
                 //tile to the 'allHiddenNeighbours' array for that tile
-                for ( var py = y - 1; py <= y + 1; py++ ) {
-                    for ( var px = x - 1; px <= x + 1; px++ ) {
-                        if ( px == x && py == y ) {
+                for ( var py = col - 1; py <= col + 1; py++ ) {
+                    for ( var px = row - 1; px <= row + 1; px++ ) {
+                        if ( px == row && py == col ) {
                             continue;
                         }
-                        if ( px < 0 || py < 0 || px >= this.game.board.width || py >= this.game.board.height ) {
+                        if ( px < 0 || py < 0 || px >= this.game.board.rows || py >= this.game.board.cols ) {
                             continue;
                         }
                         if ( this.game.board.grid[ px ][ py ].hidden == true ) {
@@ -94,16 +94,16 @@ let AI = function () {
 
         //code for adding a list of tiles that satisfy the condition of linkedTiles to that array and also taking care
         //of isLinked attribute for that tile
-        for ( var x = 0; x < this.game.board.width; x++ ) {
-            for ( var y = 0; y < this.game.board.height; y++ ) {
-                if ( this.game.board.grid[ x ][ y ].danger - this.game.board.grid[ x ][ y ].flaggedNear === 1 && this.game.board.grid[ x ][ y ].hiddenNear !== 1 ) {
+        for ( var row = 0; row < this.game.board.rows; row++ ) {
+            for ( var col = 0; col < this.game.board.cols; col++ ) {
+                if ( this.game.board.grid[ row ][ col ].danger - this.game.board.grid[ row ][ col ].flaggedNear === 1 && this.game.board.grid[ row ][ col ].hiddenNear !== 1 ) {
                     var temp = [];
-                    for ( py = y - 1; py <= y + 1; py++ ) {
-                        for ( px = x - 1; px <= x + 1; px++ ) {
-                            if ( px == x && py == y ) {
+                    for ( py = col - 1; py <= col + 1; py++ ) {
+                        for ( px = row - 1; px <= row + 1; px++ ) {
+                            if ( px == row && py == col ) {
                                 continue;
                             }
-                            if ( px < 0 || py < 0 || px >= this.game.board.width || py >= this.game.board.height )
+                            if ( px < 0 || py < 0 || px >= this.game.board.rows || py >= this.game.board.cols )
                                 continue;
                             if ( this.game.board.grid[ px ][ py ].hidden == true ) {
                                 temp.push( this.game.board.grid[ px ][ py ] );
@@ -111,12 +111,12 @@ let AI = function () {
 
                         }
                     }
-                    for ( py = y - 1; py <= y + 1; py++ ) {
-                        for ( px = x - 1; px <= x + 1; px++ ) {
-                            if ( px == x && py == y ) {
+                    for ( py = col - 1; py <= col + 1; py++ ) {
+                        for ( px = row - 1; px <= row + 1; px++ ) {
+                            if ( px == row && py == col ) {
                                 continue;
                             }
-                            if ( px < 0 || py < 0 || px >= this.game.board.width || py >= this.game.board.height )
+                            if ( px < 0 || py < 0 || px >= this.game.board.rows || py >= this.game.board.cols )
                                 continue;
                             if ( this.game.board.grid[ px ][ py ].hidden == true ) {
                                 this.game.board.grid[ px ][ py ].linkedWith = [];
@@ -149,15 +149,15 @@ let AI = function () {
     //method used by our AI solver to flag the neighboring hidden tiles if the value displayed on the tile (danger)
     //and the no. of hidden tiles around the tile are same
     this.aiSameDangerAndHiddenNear = function () {
-        for ( var x = 0; x < this.game.board.width; x++ ) {
-            for ( var y = 0; y < this.game.board.height; y++ ) {
-                if ( this.game.board.grid[ x ][ y ].danger == this.game.board.grid[ x ][ y ].hiddenNear && this.game.board.grid[ x ][ y ].danger !== 0 ) {
-                    for ( var py = y - 1; py <= y + 1; py++ ) {
-                        for ( var px = x - 1; px <= x + 1; px++ ) {
-                            if ( px == x && py == y ) {
+        for ( var row = 0; row < this.game.board.rows; row++ ) {
+            for ( var col = 0; col < this.game.board.cols; col++ ) {
+                if ( this.game.board.grid[ row ][ col ].danger == this.game.board.grid[ row ][ col ].hiddenNear && this.game.board.grid[ row ][ col ].danger !== 0 ) {
+                    for ( var py = col - 1; py <= col + 1; py++ ) {
+                        for ( var px = row - 1; px <= row + 1; px++ ) {
+                            if ( px == row && py == col ) {
                                 continue;
                             }
-                            if ( px < 0 || py < 0 || px >= this.game.board.width || py >= this.game.board.height ) {
+                            if ( px < 0 || py < 0 || px >= this.game.board.rows || py >= this.game.board.cols ) {
                                 continue;
                             }
                             if ( this.game.board.grid[ px ][ py ].hidden == true && !this.game.board.grid[ px ][ py ].alreadyTargeted ) {
@@ -175,15 +175,15 @@ let AI = function () {
     //method used by our AI solver to click on the neighboring hidden tiles if the value displayed on the tile (danger)
     //and the no. of flags around the tile are same
     this.aiSameDangerAndFlaggedNear = function () {
-        for ( var x = 0; x < this.game.board.width; x++ ) {
-            for ( var y = 0; y < this.game.board.height; y++ ) {
-                if ( this.game.board.grid[ x ][ y ].danger == this.game.board.grid[ x ][ y ].flaggedNear ) {
-                    for ( var py = y - 1; py <= y + 1; py++ ) {
-                        for ( var px = x - 1; px <= x + 1; px++ ) {
-                            if ( px == x && py == y ) {
+        for ( var row = 0; row < this.game.board.rows; row++ ) {
+            for ( var col = 0; col < this.game.board.cols; col++ ) {
+                if ( this.game.board.grid[ row ][ col ].danger == this.game.board.grid[ row ][ col ].flaggedNear ) {
+                    for ( var py = col - 1; py <= col + 1; py++ ) {
+                        for ( var px = row - 1; px <= row + 1; px++ ) {
+                            if ( px == row && py == col ) {
                                 continue;
                             }
-                            if ( px < 0 || py < 0 || px >= this.game.board.width || py >= this.game.board.height ) {
+                            if ( px < 0 || py < 0 || px >= this.game.board.rows || py >= this.game.board.cols ) {
                                 continue;
                             }
                             if ( this.game.board.grid[ px ][ py ].hidden == true && !this.game.board.grid[ px ][ py ].alreadyTargeted ) {
@@ -202,26 +202,26 @@ let AI = function () {
     //logic for safe tiles is such that mutually excluded set of tiles from the intersection of all the set of tiles
     //in the array of 'linkedWith'
     this.aiFindTargetsUsingLinkedInfo = function () {
-        for ( var x = 0; x < this.game.board.width; x++ ) {
-            for ( var y = 0; y < this.game.board.height; y++ ) {
-                if ( this.game.board.grid[ x ][ y ].hidden == false && this.game.board.grid[ x ][ y ].isFlagged == false ) {
-                    if ( this.game.board.grid[ x ][ y ].danger !== 1 && this.game.board.grid[ x ][ y ].danger !== 0 &&
-                        this.game.board.grid[ x ][ y ].danger - this.game.board.grid[ x ][ y ].flaggedNear > 1 ) {
-                        for ( var k = 0; k < this.game.board.grid[ x ][ y ].allHiddenNeighbours.length; k++ ) {
-                            if ( this.game.board.grid[ x ][ y ].allHiddenNeighbours[ k ].isLinked ) {
+        for ( var row = 0; row < this.game.board.rows; row++ ) {
+            for ( var col = 0; col < this.game.board.cols; col++ ) {
+                if ( this.game.board.grid[ row ][ col ].hidden == false && this.game.board.grid[ row ][ col ].isFlagged == false ) {
+                    if ( this.game.board.grid[ row ][ col ].danger !== 1 && this.game.board.grid[ row ][ col ].danger !== 0 &&
+                        this.game.board.grid[ row ][ col ].danger - this.game.board.grid[ row ][ col ].flaggedNear > 1 ) {
+                        for ( var k = 0; k < this.game.board.grid[ row ][ col ].allHiddenNeighbours.length; k++ ) {
+                            if ( this.game.board.grid[ row ][ col ].allHiddenNeighbours[ k ].isLinked ) {
                                 var numberOfLinked = 0;
                                 linkedTilesAdjacentToThis = [];
-                                for ( var l = 0; l < this.game.board.grid[ x ][ y ].allHiddenNeighbours[ k ].linkedWith.length; l++ ) {
-                                    if ( this.game.board.grid[ x ][ y ].allHiddenNeighbours.includes( this.game.board.grid[ x ][ y ].allHiddenNeighbours[ k ].linkedWith[ l ] ) ) {
+                                for ( var l = 0; l < this.game.board.grid[ row ][ col ].allHiddenNeighbours[ k ].linkedWith.length; l++ ) {
+                                    if ( this.game.board.grid[ row ][ col ].allHiddenNeighbours.includes( this.game.board.grid[ row ][ col ].allHiddenNeighbours[ k ].linkedWith[ l ] ) ) {
                                         numberOfLinked += 1;
-                                        linkedTilesAdjacentToThis.push( this.game.board.grid[ x ][ y ].allHiddenNeighbours[ k ].linkedWith[ l ] );
+                                        linkedTilesAdjacentToThis.push( this.game.board.grid[ row ][ col ].allHiddenNeighbours[ k ].linkedWith[ l ] );
                                     }
                                 }
                                 if ( numberOfLinked > 1 ) {
-                                    if ( this.game.board.grid[ x ][ y ].hiddenNear - ( numberOfLinked - 1 ) === this.game.board.grid[ x ][ y ].danger ) {
-                                        for ( var m = 0; m < this.game.board.grid[ x ][ y ].allHiddenNeighbours.length; m++ ) {
-                                            if ( !linkedTilesAdjacentToThis.includes( this.game.board.grid[ x ][ y ].allHiddenNeighbours[ m ] ) ) {
-                                                temp = this.game.board.grid[ x ][ y ].allHiddenNeighbours[ m ];
+                                    if ( this.game.board.grid[ row ][ col ].hiddenNear - ( numberOfLinked - 1 ) === this.game.board.grid[ row ][ col ].danger ) {
+                                        for ( var m = 0; m < this.game.board.grid[ row ][ col ].allHiddenNeighbours.length; m++ ) {
+                                            if ( !linkedTilesAdjacentToThis.includes( this.game.board.grid[ row ][ col ].allHiddenNeighbours[ m ] ) ) {
+                                                temp = this.game.board.grid[ row ][ col ].allHiddenNeighbours[ m ];
                                                 this.targetsList.push( new Target( temp.x, temp.y, true ) );
                                                 console.log( "aiFindTargetsUsingLinkedInfo clicks" );
                                                 temp.alreadyTargeted = true;
@@ -252,15 +252,15 @@ let AI = function () {
                         break;
                     case 1:
                         this.aiTargetX = 0;
-                        this.aiTargetY = this.game.board.height - 1;
+                        this.aiTargetY = this.game.board.cols - 1;
                         break;
                     case 2:
-                        this.aiTargetX = this.game.board.width - 1;
+                        this.aiTargetX = this.game.board.rows - 1;
                         this.aiTargetY = 0;
                         break;
                     case 3:
-                        this.aiTargetX = this.game.board.width - 1;
-                        this.aiTargetY = this.game.board.height - 1;
+                        this.aiTargetX = this.game.board.rows - 1;
+                        this.aiTargetY = this.game.board.cols - 1;
                         break;
                 }
                 this.aiCorners[ cornerId ] = 1;
@@ -269,8 +269,8 @@ let AI = function () {
             }
         } else {
             do {
-                aiTargetX = Math.floor( Math.random() * this.game.board.width );
-                aiTargetY = Math.floor( Math.random() * this.game.board.height );
+                aiTargetX = Math.floor( Math.random() * this.game.board.rows );
+                aiTargetY = Math.floor( Math.random() * this.game.board.cols );
             } while ( this.game.board.grid[ aiTargetX ][ aiTargetY ].hidden == false ||
                 this.game.board.grid[ aiTargetX ][ aiTargetY ].isFlagged == true || this.game.board.grid[ aiTargetX ][ aiTargetY ].hasMine == true );
             this.flagTarget = false;
