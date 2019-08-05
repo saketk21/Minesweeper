@@ -48,7 +48,7 @@ app.get( '/leaderboard', ( request, response ) => {
 io.on( 'connection', socket => {
 	console.log( "Socket ", socket.id, " - connected " );
 	socket.on( Constants.SOCKET_NEW_GAME, data => {
-		console.log( "New Game Requested" );
+		console.log( "New Game Requested. SocketToGameMap length:-", socketToGameMap.size );
 		// Create Game object for the new game
 		let newGame = new Game();
 		// let ai = new AI();
@@ -57,7 +57,7 @@ io.on( 'connection', socket => {
 		socketToGameMap.set( socket.id, newGame );
 		// socketToAIMap.set( socket.id, ai );
 		let gameState = newGame.getGameState();
-		let newBoardConfig = newGame.board.coords();
+		let newBoardConfig = newGame.board.toString( gameState );
 		socket.emit( Constants.SOCKET_CURRENT_STATE, {
 			'newBoardConfig': newBoardConfig,
 			'gameState': gameState
