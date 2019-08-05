@@ -6,6 +6,7 @@ let Board = function ( rows, cols, mineCount ) {
 	this.rows = rows;
 	this.cols = cols;
 	this.mineCount = mineCount;
+	this.value3BV = 0;
 	this.grid = [];
 
 	this.initGrid = function () {
@@ -20,6 +21,87 @@ let Board = function ( rows, cols, mineCount ) {
 		}
 		this.placeMines();
 		this.calcDanger();
+		this.calc3BV();
+	};
+
+	this.calc3BV = function(){
+		let visited = [];
+		let affected = [];
+		let depressedAreas = 0;
+		let clonedGrid = (function{
+			let array = [];
+			for(let x = 0; x < rows; x++){
+				for(let y = 0; y < columns; y++){
+					if(this.grid[x][y].hasMine == true)
+						array.push(-1);
+					else if(this.grid[x][y].danger == 0)
+						array.push(0);
+					else
+						array.push(1);
+					
+					visited.push(false);
+					affected.push(false);
+				}
+			}
+			return array;
+		}());
+
+		for(let index = 0; index < clonedGrid.length; index++){
+			if(clonedGrid[index] === 0){
+					calcValue(index);
+					depressedAreas++;
+			}
+		}
+
+		let calcValue = (function (idx) {
+			if(clonedGrid[idx] === -1)
+				return;
+		
+			if((clonedGrid[idx] === 0 && visited[idx] == false) || (affected[idx] === true)) {
+		
+				if(clonedGrid[idx] === 0)
+					affected[idx] = false;
+		
+				if(affected[idx] === true){
+					clonedGrid[idx] = -1;
+					visited[idx] = true;
+					return;
+				}
+				
+				for (var py = this.rows - 1; py <= this.rows + 1; py++) {
+					for (var px = this.columns - 1; px <= this.columns + 1; px++) {
+						if (px == (idx - (idx / this.rows)) && py == (idx / this.columns)) { continue; }
+		
+						if (px < 0 || py < 0 ||
+							px >= this.columns ||
+							py >= this.rows) {
+							continue;
+						}
+						clonedGrid[idx] = -1;
+						visited[idx] = true;
+						var index = py * this.columns + px;
+		
+						affected[index] = true;
+						calcValue(index);
+		
+					}
+		
+				}
+		
+			}
+		}());
+
+		let numberCount = 0;
+		for(var ind = 0; ind < clonedGrid.length; ind++)
+	 	if(clonedGrid[ind] === 1)
+					numberCount++;
+
+		this.value3BV = this.depressedAreas + this.numberCount;
+
+	};
+
+	this.get3BV = function(){
+		return this.value3BV;
 	};
 
 	this.placeMines = function () {

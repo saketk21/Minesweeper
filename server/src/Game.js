@@ -10,6 +10,8 @@ let Game = function () {
 	this.gameState = gameStates.NOT_STARTED;
 	this.startTime = null;
 	this.timeTaken = null;
+	this.leftClicks = 0;
+	this.rightClicks = 0;
 
 	this.init = function ( playerName, socket, difficulty ) {
 		this.playerName = playerName;
@@ -31,7 +33,7 @@ let Game = function () {
 			}
 		}
 		this.gameState = gameStates.WIN;
-		this.timeTaken = Date.now() - startTime;
+		this.timeTaken = Date.now() - this.startTime;
 	};
 
 	this.chord = function ( row, col, tileDanger ) {
@@ -86,6 +88,7 @@ let Game = function () {
 	};
 
 	this.handleClick = function ( row, col ) {
+		this.leftClick++;
 		if ( row >= 0 && col >= 0 && row < this.board.rows && col < this.board.cols ) {
 			// Will return grid's string representation after the click action
 			console.log( this.board.grid[ row ][ col ] );
@@ -105,13 +108,22 @@ let Game = function () {
 	};
 
 	this.handleFlag = function ( row, col ) {
+		this.rightClick++;
 		this.board.grid[ row ][ col ].flagOrUnflagTile();
 		return this.board.toString( this.gameState );
 	}
 
+	this.getTotalClicks = function(){
+		return (leftClicks + rightclicks);
+	};
+
+	this.getEfficiency = function(){
+		return (this.getTotalClicks()/this.board.get3BV());
+	};
+
 	this.getGameState = function () {
 		return this.gameState;
-	}
+	};
 
 	this.updateStatistics = function () {
 
