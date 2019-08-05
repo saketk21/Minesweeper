@@ -12,10 +12,7 @@ let AI = function () {
     this.targetsList = []; //has a list of tiles on which the AI will perform either click or flag action
     this.aiCornerCount = 0;
     this.aiCorners = [ 0, 0, 0, 0 ];
-    this.row = null;
-    this.col = null;
-    this.needToFlag = null;
-
+    
     this.init = function ( game ) { //init called when new AI object is created
         this.game = game;
 
