@@ -1,4 +1,4 @@
-const gameStates = require( './GameStates.js' );
+const gameStates = require( '../../lib/GameStates.js' );
 const tileTypes = require( './TileTypes.js' );
 let Tile = require( './Tile.js' );
 

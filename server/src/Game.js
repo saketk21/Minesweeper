@@ -1,5 +1,5 @@
-const difficulties = require( './Difficulties.js' );
-const gameStates = require( './GameStates.js' );
+const difficulties = require( '../../lib/Difficulties.js' );
+const gameStates = require( '../../lib/GameStates.js' );
 const tileTypes = require( './TileTypes.js' );
 const Board = require( './Board.js' );
 
@@ -113,12 +113,12 @@ let Game = function () {
 		return this.board.toString( this.gameState );
 	}
 
-	this.getTotalClicks = function(){
-		return (leftClicks + rightclicks);
+	this.getTotalClicks = function () {
+		return ( leftClicks + rightclicks );
 	};
 
-	this.getEfficiency = function(){
-		return (this.getTotalClicks()/this.board.get3BV());
+	this.getEfficiency = function () {
+		return ( this.getTotalClicks() / this.board.get3BV() );
 	};
 
 	this.getGameState = function () {

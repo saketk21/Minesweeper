@@ -1,5 +1,5 @@
-const difficulties = require( './Difficulties.js' );
-const gameStates = require( './GameStates.js' );
+const difficulties = require( '../../lib/Difficulties.js' );
+const gameStates = require( '../../lib/GameStates.js' );
 const tileTypes = require( './TileTypes.js' );
 let Tile = require( './Tile.js' );
 
@@ -12,7 +12,7 @@ let AI = function () {
     this.targetsList = []; //has a list of tiles on which the AI will perform either click or flag action
     this.aiCornerCount = 0;
     this.aiCorners = [ 0, 0, 0, 0 ];
-    
+
     this.init = function ( game ) { //init called when new AI object is created
         this.game = game;
 
@@ -162,9 +162,9 @@ let AI = function () {
                             }
                             if ( this.game.board.grid[ dr ][ dc ].hidden == true && !this.game.board.grid[ dr ][ dc ].alreadyTargeted ) {
                                 var target = {};
-                                target["row"] = dr;
-                                target["col"] = dc;
-                                target["needToFlag"] = true;
+                                target[ "row" ] = dr;
+                                target[ "col" ] = dc;
+                                target[ "needToFlag" ] = true;
                                 this.targetsList.push( target );
                                 console.log( "aiSameDangerAndHiddenNear flags" );
                                 this.game.board.grid[ dr ][ dc ].alreadyTargeted = true;
@@ -192,9 +192,9 @@ let AI = function () {
                             }
                             if ( this.game.board.grid[ dr ][ dc ].hidden == true && !this.game.board.grid[ dr ][ dc ].alreadyTargeted ) {
                                 var target = {};
-                                target["row"] = dr;
-                                target["col"] = dc;
-                                target["needToFlag"] = false;
+                                target[ "row" ] = dr;
+                                target[ "col" ] = dc;
+                                target[ "needToFlag" ] = false;
                                 this.targetsList.push( target );
                                 console.log( "aiSameDangerAndFlaggedNear clicks" );
                                 this.game.board.grid[ dr ][ dc ].alreadyTargeted = true;
@@ -231,10 +231,10 @@ let AI = function () {
                                             if ( !linkedTilesAdjacentToThis.includes( this.game.board.grid[ row ][ col ].allHiddenNeighbours[ m ] ) ) {
                                                 temp = this.game.board.grid[ row ][ col ].allHiddenNeighbours[ m ];
                                                 var target = {};
-                                                target["row"] = temp.row;
-                                                target["col"] = temp.col;
-                                                target["needToFlag"] = true;                
-                                                this.targetsList.push( target  );
+                                                target[ "row" ] = temp.row;
+                                                target[ "col" ] = temp.col;
+                                                target[ "needToFlag" ] = true;
+                                                this.targetsList.push( target );
                                                 console.log( "aiFindTargetsUsingLinkedInfo clicks" );
                                                 temp.alreadyTargeted = true;
                                             }

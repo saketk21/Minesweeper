@@ -8,7 +8,7 @@ const path = require( 'path' )
 const socketIO = require( 'socket.io' )
 const Constants = require( './lib/Constants.js' )
 const Game = require( './server/src/Game.js' )
-const gameStates = require( './server/src/GameStates.js' )
+const gameStates = require( './lib/GameStates.js' )
 const AI = require( './server/src/AI.js' );
 
 // Initialization
