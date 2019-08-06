@@ -38,10 +38,10 @@ let Game = function () {
 
 	this.chord = function ( row, col, tileDanger ) {
 		let flagsAroundTile = 0;
-		console.log( "Chroding:- ", row, col, tileDanger );
+		//console.log( "Chroding:- ", row, col, tileDanger );
 		for ( var dr = row - 1; dr <= row + 1; dr++ ) {
 			for ( var dc = col - 1; dc <= col + 1; dc++ ) {
-				console.log( "DR, DC in chording:-", dr, dc );
+				//console.log( "DR, DC in chording:-", dr, dc );
 				if ( dr == row && dc == col )
 					continue;
 				if ( dr < 0 || dr >= this.board.rows || dc < 0 || dc >= this.board.cols )
@@ -50,9 +50,9 @@ let Game = function () {
 					flagsAroundTile += 1;
 			}
 		}
-		console.log( "flags around (" + row + ", " + col + ") -- ", flagsAroundTile );
+		//console.log( "flags around (" + row + ", " + col + ") -- ", flagsAroundTile );
 		if ( flagsAroundTile === tileDanger ) {
-			console.log( "Trying all neighbours:- " )
+			//console.log( "Trying all neighbours:- " )
 			for ( var dr = row - 1; dr <= row + 1; dr++ ) {
 				for ( var dc = col - 1; dc <= col + 1; dc++ ) {
 					if ( dr == row && dc == col )
@@ -60,7 +60,7 @@ let Game = function () {
 					if ( dr < 0 || dr >= this.board.rows || dc < 0 || dc >= this.board.cols )
 						continue;
 					if ( this.board.grid[ dr ][ dc ].hidden ) {
-						console.log( "Hidden:- ", dr, dc );
+						//console.log( "Hidden:- ", dr, dc );
 						this.handleClick( dr, dc );
 					}
 				}
@@ -69,14 +69,14 @@ let Game = function () {
 	};
 
 	this.revealNeighbours = function ( row, col ) {
-		console.log( "Call with:", row, col, this.board.rows, this.board.cols );
+		//console.log( "Call with:", row, col, this.board.rows, this.board.cols );
 		for ( var dr = row - 1; dr <= row + 1; dr++ ) {
 			for ( var dc = col - 1; dc <= col + 1; dc++ ) {
 				if ( dr === row && dc === col )
 					continue;
 				if ( dr < 0 || dr >= this.board.rows || dc < 0 || dc >= this.board.cols )
 					continue;
-				console.log( "\tdr, dc: ", dr, dc, this.board.rows, this.board.cols );
+				//console.log( "\tdr, dc: ", dr, dc, this.board.rows, this.board.cols );
 				if ( this.board.grid[ dr ][ dc ].hidden ) {
 					let clickStatus = this.board.grid[ dr ][ dc ].revealTile();
 					if ( clickStatus === 0 ) {
@@ -91,9 +91,9 @@ let Game = function () {
 		this.leftClick++;
 		if ( row >= 0 && col >= 0 && row < this.board.rows && col < this.board.cols ) {
 			// Will return grid's string representation after the click action
-			console.log( this.board.grid[ row ][ col ] );
+			//console.log( this.board.grid[ row ][ col ] );
 			let clickStatus = this.board.grid[ row ][ col ].revealTile();
-			console.log( clickStatus );
+			//console.log( clickStatus );
 			if ( clickStatus === tileTypes.MINE_CLICKED ) {
 				this.gameState = gameStates.LOSE;
 			} else if ( clickStatus === tileTypes.VISIBLE ) {

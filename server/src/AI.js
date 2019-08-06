@@ -81,11 +81,11 @@ let AI = function () {
                             continue;
                         }
                         if ( this.game.board.grid[ dr ][ dc ].hidden == true ) {
-                            this.game.board.grid[ dr ][ dc ].hiddenNear += 1;
-                            this.game.board.grid[ dr ][ dc ].allHiddenNeighbours.push( this.game.board.grid[ dr ][ dc ] );
+                            this.game.board.grid[ row ][ col ].hiddenNear += 1;
+                            this.game.board.grid[ row ][ col ].allHiddenNeighbours.push( this.game.board.grid[ dr ][ dc ] );
                         }
                         if ( this.game.board.grid[ dr ][ dc ].isFlagged == true ) {
-                            this.game.board.grid[ dr ][ dc ].flaggedNear += 1;
+                            this.game.board.grid[ row ][ col ].flaggedNear += 1;
                         }
                     }
                 }
