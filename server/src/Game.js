@@ -2,6 +2,7 @@ const difficulties = require( '../../lib/Difficulties.js' );
 const gameStates = require( '../../lib/GameStates.js' );
 const tileTypes = require( './TileTypes.js' );
 const Board = require( './Board.js' );
+const mongoose = require( "mongoose" );
 
 let Game = function () {
 	this.board = null;
@@ -12,6 +13,7 @@ let Game = function () {
 	this.timeTaken = null;
 	this.leftClicks = 0;
 	this.rightClicks = 0;
+	this.difficulty = null;
 
 	this.init = function ( playerName, socket, difficulty ) {
 		this.playerName = playerName;
@@ -123,16 +125,33 @@ let Game = function () {
 		return this.gameState;
 	};
 
-	this.setLeftClick = function(){
+	this.setLeftClick = function () {
 		this.leftClicks++;
 	}
 
-	this.setRightClick = function(){
+	this.setRightClick = function () {
 		this.rightClicks++;
 	}
 
 	this.updateStatistics = function () {
-
+		var Schema = mongoose.Schema;
+		var leaderBoardSchema = new Schema( {
+			playerName: String,
+			gameMode: String,
+			completionTime: String
+		} );
+		var userModel = mongoose.model( "userModel", leaderBoardSchema, 'user' );
+		var newUser = new userModel( {
+			playerName: this.playerName,
+			gameMode: this.difficulty,
+			completionTime: this.timeTaken
+		} );
+		newUser.save( function ( error ) {
+			console.log( "New user's data has been added!" );
+			if ( error ) {
+				console.error( error );
+			}
+		} );
 	};
 }
 
