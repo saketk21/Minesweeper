@@ -5,15 +5,46 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.7/css/mdb.min.css" rel="stylesheet">
 	<title>Elvnth-Hour Minesweeper</title>
 </head>
 
 <body>
-	<button id="beginner">Beginner</button>
-	<button id="intermediate">Intermediate</button>
-	<button id="expert">Expert</button>
-	<canvas id="game"></canvas>
+	<div id="game-container" style="width: 800px; height: 500px; background-color: blanchedalmond;">
+		<form action="startNewGame" class="pl-5">
+			<div class="md-form">
+				<input type="text" id="playerName" class="form-control">
+				<label for="playerName">Enter Player Nickname</label>
+			</div>
+			<div class="custom-control custom-radio custom-control-inline">
+				<input type="radio" class="custom-control-input" id="beginner" name="difficulty">
+				<label class="custom-control-label" for="beginner">Beginner</label>
+			</div>
+			<div class="custom-control custom-radio custom-control-inline">
+				<input type="radio" class="custom-control-input" id="intermediate" name="difficulty">
+				<label class="custom-control-label" for="intermediate">Intermediate</label>
+			</div>
+			<div class="custom-control custom-radio custom-control-inline">
+				<input type="radio" class="custom-control-input" id="expert" name="difficulty">
+				<label class="custom-control-label" for="expert">Expert</label>
+			</div>
+		</form>
+
+		<canvas id="game"></canvas>
+	</div>
 	<script src="/dist/client.bundle.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<!-- Bootstrap tooltips -->
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js">
+	</script>
+	<!-- Bootstrap core JavaScript -->
+	<script type="text/javascript"
+		src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	<!-- MDB core JavaScript -->
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.7/js/mdb.min.js">
+	</script>
 </body>
 
 </html>
