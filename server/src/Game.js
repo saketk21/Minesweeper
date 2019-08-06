@@ -114,7 +114,7 @@ let Game = function () {
 	}
 
 	this.getTotalClicks = function () {
-		return ( leftClicks + rightclicks );
+		return ( this.leftClicks + this.rightClicks );
 	};
 
 	this.getEfficiency = function () {
