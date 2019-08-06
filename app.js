@@ -95,6 +95,7 @@ io.on( 'connection', socket => {
 		let gameOfThisSocket = socketToGameMap.get( socket.id );
 
 		if ( gameOfThisSocket ) {
+			gameOfThisSocket.setLeftClick();
 			let newBoardConfig = gameOfThisSocket.handleClick( data.row, data.col );
 			let gameState = gameOfThisSocket.getGameState();
 			// Emit appropriate event based on gameState
@@ -121,6 +122,7 @@ io.on( 'connection', socket => {
 	socket.on( Constants.SOCKET_FLAG_ACTION, data => {
 		let gameOfThisSocket = socketToGameMap.get( socket.id );
 		if ( gameOfThisSocket ) {
+			gameOfThisSocket.setRightClick();
 			let newBoardConfig = gameOfThisSocket.handleFlag( data.row, data.col );
 			let gameState = gameOfThisSocket.getGameState();
 			socket.emit( Constants.SOCKET_CURRENT_STATE, {

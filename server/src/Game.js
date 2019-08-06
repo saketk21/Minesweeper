@@ -88,7 +88,6 @@ let Game = function () {
 	};
 
 	this.handleClick = function ( row, col ) {
-		this.leftClicks++;
 		if ( row >= 0 && col >= 0 && row < this.board.rows && col < this.board.cols ) {
 			// Will return grid's string representation after the click action
 			//console.log( this.board.grid[ row ][ col ] );
@@ -108,7 +107,6 @@ let Game = function () {
 	};
 
 	this.handleFlag = function ( row, col ) {
-		this.rightClicks++;
 		this.board.grid[ row ][ col ].flagOrUnflagTile();
 		return this.board.toString( this.gameState );
 	}
@@ -118,12 +116,20 @@ let Game = function () {
 	};
 
 	this.getEfficiency = function () {
-		return ( this.getTotalClicks() / this.board.get3BV() );
+		return ( this.board.get3BV() / this.getTotalClicks() );
 	};
 
 	this.getGameState = function () {
 		return this.gameState;
 	};
+
+	this.setLeftClick = function(){
+		this.leftClicks++;
+	}
+
+	this.setRightClick = function(){
+		this.rightClicks++;
+	}
 
 	this.updateStatistics = function () {
 
