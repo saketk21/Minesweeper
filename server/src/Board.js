@@ -42,9 +42,8 @@ let Board = function ( rows, cols, mineCount ) {
 				affected.push( false );
 			}
 		}
-		console.log( clonedGrid );
 
-		let updateAffectedDepressedRegion = function ( idx ) {
+		let updateAffectedDepressedRegion = function ( idx, rows, cols ) {
 			if ( clonedGrid[ idx ] === -1 )
 				return;
 
@@ -58,8 +57,11 @@ let Board = function ( rows, cols, mineCount ) {
 					visited[ idx ] = true;
 					return;
 				}
-				let rowForIdx = Math.floor( idx / this.cols ),
-					colForIdx = idx % this.cols;
+
+				clonedGrid[ idx ] = -1;
+				visited[ idx ] = true;
+				let rowForIdx = Math.floor( idx / cols ),
+					colForIdx = idx % cols;
 
 				for ( var dr = rowForIdx - 1; dr <= rowForIdx + 1; dr++ ) {
 					for ( var dc = colForIdx - 1; dc <= colForIdx + 1; dc++ ) {
@@ -67,15 +69,12 @@ let Board = function ( rows, cols, mineCount ) {
 							continue;
 						}
 
-						if ( dc < 0 || dr < 0 || dc >= this.cols || dr >= this.rows ) {
+						if ( dc < 0 || dr < 0 || dc >= cols || dr >= rows ) {
 							continue;
 						}
-						clonedGrid[ idx ] = -1;
-						visited[ idx ] = true;
-						var index = dr * this.cols + dc;
-
+						var index = dr * cols + dc;
 						affected[ index ] = true;
-						updateAffectedDepressedRegion( index );
+						updateAffectedDepressedRegion( index, rows, cols );
 					}
 				}
 			}
@@ -83,18 +82,16 @@ let Board = function ( rows, cols, mineCount ) {
 
 		for ( let index = 0; index < clonedGrid.length; index++ ) {
 			if ( clonedGrid[ index ] === 0 ) {
-				updateAffectedDepressedRegion( index );
+				updateAffectedDepressedRegion( index, this.rows, this.cols );
 				depressedAreas++;
 			}
 		}
-		console.log( depressedAreas );
 		let numberCount = 0;
 		for ( var ind = 0; ind < clonedGrid.length; ind++ )
 			if ( clonedGrid[ ind ] === 1 )
 				numberCount++;
 
 		this.value3BV = depressedAreas + numberCount;
-		console.log( this.value3BV );
 	};
 
 	this.get3BV = function () {
