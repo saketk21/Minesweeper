@@ -23,19 +23,6 @@ let socketToGameMap = new Map()
 let socketToAIMap = new Map()
 
 
-//for db connection
-var mongoose = require( "mongoose" );
-mongoose.connect( "mongodb://localhost:27017/leaderBoard", {
-	useNewUrlParser: true
-} );
-// server to connect
-var db = mongoose.connection;
-db.on( "error", console.error.bind( console, "connection error" ) );
-db.once( "open", function ( callback ) {
-	console.log( "Connection succeeded." );
-} );
-
-
 app.set( 'port', PORT )
 
 app.use( '/client', express.static( path.join( __dirname, '/client' ) ) )
@@ -87,7 +74,7 @@ io.on( 'connection', socket => {
 	// socket.on( Constants.SOCKET_JOIN_GAME, data => {
 	// 	let gameRoomToJoin = gameRoomNameToGameRoomMap.get( data.gameRoomName );
 	// 	if ( gameRoomToJoin.passphrase === data.passphrase ) {
-	// 		// Create
+	// 		// Create 
 	// 		gameRoomToJoin.addNewPlayer( socket, data.playerName )
 	// 	} else {
 	// 		socket.emit( Constants.SOCKET_WRONG_PASSPHRASE, "Wrong passphrase for the room" );
@@ -151,6 +138,7 @@ io.on( 'connection', socket => {
 		let aiOfThisSocket = socketToAIMap.get( socket.id );
 		let newBoardConfig = aiOfThisSocket.aiSolve();
 		let gameState = gameOfThisSocket.getGameState();
+
 		if ( gameState === gameStates.WIN ) {
 			socket.emit( Constants.SOCKET_WIN_STATE, {
 				'newBoardConfig': newBoardConfig,
