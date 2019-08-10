@@ -12,16 +12,18 @@ function startGame( difficulty ) {
 	} )
 }
 
-$( "#beginner" ).click( function () {
-	startGame( 'beginner' );
-} );
+$( 'document' ).ready( function () {
+	$( "#beginner" ).click( function () {
+		startGame( 'beginner' );
+	} );
 
-$( "#intermediate" ).click( function () {
-	startGame( 'intermediate' );
-} );
+	$( "#intermediate" ).click( function () {
+		startGame( 'intermediate' );
+	} );
 
-$( "#expert" ).click( function () {
-	startGame( 'expert' );
+	$( "#expert" ).click( function () {
+		startGame( 'expert' );
+	} );
 } );
 
 function startClick( row, col ) {

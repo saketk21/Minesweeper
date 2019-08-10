@@ -8,30 +8,24 @@
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.7/css/mdb.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="/dist/style.css">
 	<title>Elvnth-Hour Minesweeper</title>
 </head>
 
 <body>
-	<div id="game-container" style="width: 800px; height: 500px; background-color: blanchedalmond;">
-		<form action="startNewGame" class="pl-5">
-			<div class="md-form">
-				<input type="text" id="playerName" class="form-control">
-				<label for="playerName">Enter Player Nickname</label>
-			</div>
-			<div class="custom-control custom-radio custom-control-inline">
-				<input type="radio" class="custom-control-input" id="beginner" name="difficulty">
-				<label class="custom-control-label" for="beginner">Beginner</label>
-			</div>
-			<div class="custom-control custom-radio custom-control-inline">
-				<input type="radio" class="custom-control-input" id="intermediate" name="difficulty">
-				<label class="custom-control-label" for="intermediate">Intermediate</label>
-			</div>
-			<div class="custom-control custom-radio custom-control-inline">
-				<input type="radio" class="custom-control-input" id="expert" name="difficulty">
-				<label class="custom-control-label" for="expert">Expert</label>
-			</div>
-		</form>
-
+	<div id="game-container" class="m-5 game-container">
+		<ul class="nav nav-tabs aqua-gradient justify-content-center font-weight-bold py-4 mb-2" role="tablist">
+			<li class="nav-item">
+				<a class="nav-link active" id="beginner" data-toggle="tab" role="tab" aria-selected="true">Beginner</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="intermediate" data-toggle="tab" role="tab"
+					aria-selected="false">Intermediate</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="expert" data-toggle="tab" role="tab" aria-selected="false">Expert</a>
+			</li>
+		</ul>
 		<canvas id="game"></canvas>
 	</div>
 	<script src="/dist/client.bundle.js"></script>
